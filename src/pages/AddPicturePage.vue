@@ -3,8 +3,17 @@
     <h2 style="margin-bottom: 16px">
       {{route.query?.id?'修改图片':'创建图片'}}
     </h2>
-<!--    图片上传组件-->
-    <PictureUpload :onSuccess="onSuccess" :picture="picture" />
+<!--    选择上传方式-->
+    <a-tabs v-model:activeKey="uploadType">
+      <a-tab-pane key="file" tab="文件上传">
+        <!--    图片上传组件-->
+        <PictureUpload :onSuccess="onSuccess" :picture="picture" />
+      </a-tab-pane>
+      <a-tab-pane key="url" tab="URL上传" force-render>
+        <UrlPictureUpload :onSuccess="onSuccess" :picture="picture"/>
+      </a-tab-pane>
+    </a-tabs>
+<!--    图片信息表单-->
     <a-form v-if="picture" name="pictureForm" layout="vertical" :model="pictureForm" @finish="handleSubmit">
       <a-form-item name="name" label="名称">
         <a-input v-model:value="pictureForm.name" placeholder="输入名称" allow-clear />
@@ -33,9 +42,11 @@ import router from "@/router";
 import {message} from "ant-design-vue";
 import {editPictureUsingPost, getPictureVoByIdUsingGet, listPictureTagCategoryUsingGet} from "@/api/pictureController";
 import {useRoute} from "vue-router";
+import UrlPictureUpload from "@/components/UrlPictureUpload.vue";
 
 const picture = ref<API.PictureVO>()
 const pictureForm =reactive<API.PictureEditRequest>({})
+const uploadType = ref<'file'|'url'>('file')
 
 const onSuccess = (newPicture:API.PictureVO)=>{
   picture.value = newPicture;
@@ -68,7 +79,6 @@ const tagOptions = ref<string[]>([])
 
 const getTagCategoryOptions  = async () =>{
   const res=  await listPictureTagCategoryUsingGet()
-  //操作成功
   if(res.data.code === 0 && res.data.data){
     tagOptions.value = (res.data.data.tagList ?? []).map((data:string) =>{
       return {
@@ -83,6 +93,8 @@ const getTagCategoryOptions  = async () =>{
         label:data
       }
     })
+  }else{
+    message.error('获取标签分页列表失败'+res.data.message)
   }
 }
 

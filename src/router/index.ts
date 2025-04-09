@@ -5,6 +5,7 @@ import UserRegisterPage from '@/pages/user/UserRegisterPage.vue'
 import UserManagePage from '@/pages/admin/UserManagePage.vue'
 import PictureManagePage from '@/pages/admin/PictureManagePage.vue'
 import AddPicturePage from '@/pages/AddPicturePage.vue'
+import PictureDetailPage from '@/pages/PictureDetailPage.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -39,8 +40,14 @@ const router = createRouter({
       component:AddPicturePage
     },
     {
+      path:'/picture/:id',
+      name:'图片详情',
+      component:PictureDetailPage,
+      props:true
+    },
+    {
       path: '/about',
-      name: 'about',
+      name: '关于',
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
