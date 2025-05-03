@@ -4,7 +4,7 @@
       <a-col flex="200px">
         <router-link to="/">
           <div class="title-bar">
-            <img class="logo" src="../assets/logo.png" alt="logo"/>
+<!--            <img class="logo" src="../assets/logo.png" alt="logo"/>-->
             <div class="title">熊Bee云图库</div>
           </div>
         </router-link>
@@ -22,6 +22,11 @@
               </a-space>
               <template #overlay>
                 <a-menu>
+                  <a-menu-item >
+                    <router-link to="/my_space"/>
+                    <UserOutlined />
+                    我的空间
+                  </a-menu-item>
                   <a-menu-item @click="doLogout">
                     <LogoutOutlined />
                     退出登录
@@ -40,7 +45,7 @@
 </template>
 <script lang="ts" setup>
 import {computed, h, ref} from 'vue';
-import {HomeOutlined,LogoutOutlined} from '@ant-design/icons-vue';
+import {HomeOutlined,LogoutOutlined,UserOutlined} from '@ant-design/icons-vue';
 import {MenuProps, message} from 'ant-design-vue';
 import {useRouter} from "vue-router";
 import {useLoginUserStore} from "@/stores/useLoginUserStore";
@@ -71,9 +76,14 @@ const originItems = [
     title: '图片管理',
   },
   {
+    key: '/admin/spaceManage',
+    label: '空间管理',
+    title: '空间管理',
+  },
+  {
     key: 'others',
-    label: h('a', { href: 'https://www.codefather.cn', target: '_blank' }, '编程导航'),
-    title: '编程导航',
+    label: h('a', { href: 'https://www.bilibili.com/', target: '_blank' }, '哔哩哔哩'),
+    title: '哔哩哔哩干杯',
   },
 ]
 

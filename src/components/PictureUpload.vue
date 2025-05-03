@@ -16,17 +16,18 @@
   </div>
 </template>
 <script lang="ts" setup>
-import {defineProps, ref} from 'vue';
+import {ref} from 'vue';
 import { PlusOutlined, LoadingOutlined } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
 import type { UploadChangeParam, UploadProps } from 'ant-design-vue';
 import {uploadPictureUsingPost} from "@/api/pictureController";
-
+import {useLoginUserStore} from "@/stores/useLoginUserStore";
 interface Props {
   picture?:API.PictureVO
+  spaceId:number,
   onSuccess?:(newPicture:API.PictureVO) => void
 }
-
+const loginUserStore = useLoginUserStore();
 const props = defineProps<Props>()
 
 /**
@@ -37,7 +38,8 @@ const handleUpload =async ({file}:any)=>{
   //设置等待的效果
   loading.value=true
   try {
-    const paramas = props.picture?{id:props.picture.id}:{}
+    const paramas: API.PictureUploadRequest = props.picture?{id:props.picture.id}:{}
+    paramas.spaceId = props.spaceId
     const res = await uploadPictureUsingPost(paramas,{},file)
     if(res.data.code === 0 && res.data.data){
       message.success('图片上传成功')
@@ -61,15 +63,25 @@ const loading = ref<boolean>(false);
  * @param file
  */
 const beforeUpload = (file: UploadProps['fileList'][number]) => {
+  const loginUser = loginUserStore.loginUser
   const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
   if (!isJpgOrPng) {
-    message.error('不支持上传改格式的图片，推荐 jpg 或 png');
+    message.error('不支持上传该格式的图片，推荐 jpg 或 png');
   }
   const isLt2M = file.size / 1024 / 1024 < 2;
-  if (!isLt2M) {
-    message.error('不能上传超过2MB的图片');
+  const isLt5M = file.size / 1024 / 1024 < 5;
+  if(loginUser.userRole === 'admin'){
+    if(!isLt5M){
+      message.error('不能上传超过5MB的图片');
+    }
+    return isJpgOrPng && isLt5M;
+  }else{
+    if (!isLt2M) {
+      message.error('不能上传超过2MB的图片');
+    }
+    return isJpgOrPng && isLt2M;
   }
-  return isJpgOrPng && isLt2M;
+
 };
 </script>
 <style scoped>

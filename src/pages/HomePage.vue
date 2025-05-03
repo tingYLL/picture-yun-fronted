@@ -29,30 +29,41 @@
       </a-space>
     </div>
     <!--图片列表-->
-    <a-list :grid="{ gutter: 16, xs: 1, sm: 2, md: 3, lg: 4, xl: 6, xxl: 6 }" :data-source="dataList" :pagination="pagination" :loading="loading">
-      <!--      作用域插槽，item是每一张图片，这里item:picture的语法是把item改名成picture，更容易阅读-->
-      <template #renderItem="{ item :picture}">
-        <a-list-item style="padding:0">
-          <a-card hoverable @click="doClickPicture(picture)" >
-            <template #cover>
-              <img :alt="picture.name" :src="picture.url" style="height: 180px;object-fit: cover"/>
-            </template>
-            <a-card-meta :title="picture.name">
-              <template #description>
-                <a-flex>
-                  <a-tag color="green">
-                    {{picture.category??'默认'}}
-                  </a-tag>
-                  <a-tag v-for="tag in picture.tags" :key="tag">
-                    {{tag}}
-                  </a-tag>
-                </a-flex>
-              </template>
-            </a-card-meta>
-          </a-card>
-        </a-list-item>
-      </template>
-    </a-list>
+<!--    <a-list :grid="{ gutter: 16, xs: 1, sm: 2, md: 3, lg: 4, xl: 6, xxl: 6 }" :data-source="dataList" :pagination="pagination" :loading="loading">-->
+<!--      &lt;!&ndash;      作用域插槽，item是每一张图片，这里item:picture的语法是把item改名成picture，更容易阅读&ndash;&gt;-->
+<!--      <template #renderItem="{ item :picture}">-->
+<!--        <a-list-item style="padding:0">-->
+<!--          <a-card hoverable @click="doClickPicture(picture)" >-->
+<!--            <template #cover>-->
+<!--              <img :alt="picture.name" :src="picture.thumbnailUrl??picture.url" style="height: 180px;object-fit: cover"/>-->
+<!--            </template>-->
+<!--            <a-card-meta :title="picture.name">-->
+<!--              <template #description>-->
+<!--                <a-flex>-->
+<!--                  <a-tag color="green">-->
+<!--                    {{picture.category??'默认'}}-->
+<!--                  </a-tag>-->
+<!--                  <a-tag v-for="tag in picture.tags" :key="tag">-->
+<!--                    {{tag}}-->
+<!--                  </a-tag>-->
+<!--                </a-flex>-->
+<!--              </template>-->
+<!--            </a-card-meta>-->
+<!--          </a-card>-->
+<!--        </a-list-item>-->
+<!--      </template>-->
+<!--    </a-list>-->
+
+<!--    图片列表-->
+    <PictureList :dataList="dataList" :loading="loading"/>
+<!--    分页-->
+    <a-pagination
+      v-model:current="searchParams.current"
+      v-model:pageSize="searchParams.pageSize"
+      :total="total"
+      @change="onPageChange"
+      style="text-align: right"
+    />
   </div>
 </template>
 <script setup lang="ts">
@@ -60,9 +71,10 @@ import {computed, onMounted, reactive, ref} from "vue";
 import {listPictureTagCategoryUsingGet, listPictureVoByPageUsingPost} from "@/api/pictureController";
 import {message} from "ant-design-vue";
 import {useRouter} from "vue-router";
+import PictureList from '@/components/PictuerList.vue'
 
 // 定义数据
-const dataList = ref<API.Picture[]>([])
+const dataList = ref<API.PictureVO[]>([])
 const total = ref(0)
 const loading = ref(true)
 const categoryList = ref<string[]>([])
@@ -110,19 +122,13 @@ onMounted(() => {
   fetchData()
 })
 
-// 分页参数
-const pagination = computed(() => {
-  return {
-    current: searchParams.current,
-    pageSize: searchParams.pageSize,
-    total: total.value,
-    onChange:(page:number,pageSize:number)=>{
-      searchParams.current = page;
-      searchParams.pageSize= pageSize
-      fetchData()
-    }
-  }
-})
+
+//当页面改变的时候会调用这个函数，来更改当前的页号和页面大小
+const onPageChange = (page:number,pageSize:number)=>{
+  searchParams.current = page;
+  searchParams.pageSize= pageSize
+  fetchData()
+}
 
 const doSearch = ()=>{
   searchParams.current = 1
@@ -147,12 +153,7 @@ onMounted(()=>{
 })
 
 const router = useRouter()
-//跳转至图片详情页
-const doClickPicture = (picture:API.PictureVO)=>{
-  router.push({
-    path:`/picture/${picture.id}`
-  })
-}
+
 </script>
 
 <style scoped>

@@ -68,7 +68,7 @@
 </template>
 <script setup lang="ts">
 import {computed, defineProps, h, onMounted, reactive, ref} from "vue";
-import {getPictureVoByIdUsingGet} from "@/api/pictureController";
+import {deletePictureUsingPost, getPictureVoByIdUsingGet} from "@/api/pictureController";
 import {useRoute, useRouter} from "vue-router";
 import {message} from "ant-design-vue";
 import {downloadImage, formatSize} from '@/utils/index'
@@ -78,7 +78,7 @@ import {
   DownloadOutlined
 } from '@ant-design/icons-vue'
 import {useLoginUserStore} from "@/stores/useLoginUserStore";
-import {deleteUserUsingPost} from "@/api/userController";
+
 
 
 interface Props {
@@ -97,18 +97,6 @@ const searchParams = reactive<API.PictureQueryRequest>({
   sortField: 'createTime',
   sortOrder: 'descend',
 })
-
-// 获取数据
-const fetchData = async () => {
-  loading.value = true
-  //转换搜索参数
-  const params = {
-    ...searchParams,
-    tags:[] as string[]
-  }
-
-  loading.value = false
-}
 
 //获取图片详情
 const  fetchPictureDetail = async ()=>{
@@ -131,7 +119,14 @@ const  fetchPictureDetail = async ()=>{
 const  loginUserStore = useLoginUserStore()
 
 const doEdit = ()=>{
-  router.push('/add_picture?id='+picture.value.id)
+  // router.push('/add_picture?id='+picture.value.id)
+  router.push({
+    path:'/add_picture',
+    query:{
+      id:picture.value.id,
+      spaceId:picture.value.spaceId
+    }
+  })
 }
 const canEdit= computed(()=>{
   const  loginUser = loginUserStore.loginUser
@@ -150,7 +145,7 @@ const doDelete = async ()=>{
   if(!id){
     return
   }
-  const res = await deleteUserUsingPost({ id })
+  const res = await deletePictureUsingPost({ id })
   if (res.data.code === 0) {
     message.success('删除成功')
   } else {

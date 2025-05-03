@@ -140,11 +140,11 @@ const columns = [
     dataIndex: 'userId',
     width: 80,
   },
-  // {
-  //   title: '空间 id',
-  //   dataIndex: 'spaceId',
-  //   width: 80,
-  // },
+  {
+    title: '空间 id',
+    dataIndex: 'spaceId',
+    width: 80,
+  },
   {
     title: '审核信息',
     dataIndex: 'reviewMessage',
@@ -179,6 +179,7 @@ const searchParams = reactive<API.PictureQueryRequest>({
 const fetchData = async () => {
   const res = await listPictureByPageUsingPost({
     ...searchParams,
+    nullSpaceId:true//加上这个查询条件，避免管理员查出用户私有空间中的图片
   })
   if (res.data.code === 0 && res.data.data) {
     dataList.value = res.data.data.records ?? []
