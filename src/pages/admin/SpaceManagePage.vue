@@ -4,8 +4,15 @@
       <h2>空间管理</h2>
       <a-space>
         <a-button type="primary" href="/add_space" target="_blank">+ 创建空间</a-button>
+        <a-button type="primary" ghost href="/space_analyze?queryPublic=1" target="_blank"
+        >分析公共图库</a-button
+        >
+        <a-button type="primary" ghost href="/space_analyze?queryAll=1" target="_blank"
+        >分析全部空间</a-button
+        >
       </a-space>
     </a-flex>
+    <div style="margin-bottom: 16px" />
     <!-- 搜索表单 -->
     <a-form layout="inline" :model="searchParams" @finish="doSearch">
       <a-form-item label="空间名称">

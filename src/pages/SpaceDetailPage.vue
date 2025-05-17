@@ -1,9 +1,20 @@
 <template>
   <div id="spaceDetailPage">
     <a-flex justify="space-between">
-      <h2>{{space.spaceName}} (私有空间)</h2>
+      <h2>{{ space.spaceName }} (私有空间)</h2>
       <a-space size="middle">
         <a-button type="primary" :href="`/add_picture?spaceId=${id}`" target="_blank">+ 创建图片</a-button>
+        <a-button
+
+          type="primary"
+          ghost
+          :icon="h(BarChartOutlined)"
+          :href="`/space_analyze?spaceId=${id}`"
+          target="_blank"
+        >
+          空间分析
+        </a-button>
+        <a-button :icon="h(EditOutlined)" @click="doBatchEdit">批量编辑</a-button>
         <a-tooltip :title="`占用空间${formatSize(space.totalSize)} / ${formatSize(space.maxSize)}`">
           <a-progress
             type="circle"
@@ -17,6 +28,12 @@
     <!--    搜索表单-->
     <PictureSearchForm :onSearch="onSearch"/>
     <div style="margin-bottom: 16px"></div>
+    <!--    按颜色搜索，跟其他搜索条件独立-->
+    <a-form-item label="按颜色搜索">
+      <a-space>
+        <color-picker format="hex" @pureColorChange="onColorChange"/>
+      </a-space>
+    </a-form-item>
     <!--    图片列表-->
     <PictureList :dataList="dataList" :loading="loading" :showOp="true" :onReload="fetchData"/>
     <!--    分页-->
@@ -27,6 +44,8 @@
       @change="onPageChange"
       style="text-align: right"
     />
+    <BatchEditPictureModal ref="batchEditPictureModalRef" :spaceId="id" :pictureList="dataList"
+                           :onSuccess="onBatchEditPictureSuccess"/>
   </div>
 </template>
 <script setup lang="ts">
@@ -38,13 +57,16 @@ import {downloadImage, formatSize} from '@/utils/index'
 import {
   DeleteOutlined,
   EditOutlined,
-  DownloadOutlined
+  DownloadOutlined,
+  BarChartOutlined
 } from '@ant-design/icons-vue'
 import {useLoginUserStore} from "@/stores/useLoginUserStore";
-import {listPictureVoByPageUsingPost} from "@/api/pictureController";
+import {listPictureVoByPageUsingPost, searchPictureByColorUsingPost} from "@/api/pictureController";
 import PictureList from '@/components/PictuerList.vue'
 import PictureSearchForm from "@/components/PictureSearchForm.vue";
-
+import {ColorPicker} from 'vue3-colorpicker';
+import "vue3-colorpicker/style.css"
+import BatchEditPictureModal from "@/components/BatchEditPictureModal.vue";
 
 interface Props {
   id: string | number
@@ -66,19 +88,19 @@ const searchParams = ref<API.SpaceQueryRequest>({
 })
 
 //获取空间详情
-const  fetchSpaceDetail = async ()=>{
+const fetchSpaceDetail = async () => {
 
   try {
     const res = await getSpaceVoByIdUsingGet({
-      id:props.id
+      id: props.id
     })
-    if(res.data.code === 0&& res.data.data){
+    if (res.data.code === 0 && res.data.data) {
       space.value = res.data.data
-    }else{
-      message.error('获取空间详情失败'+res.data.message)
+    } else {
+      message.error('获取空间详情失败' + res.data.message)
     }
-  }catch (e:any){
-    message.error('获取空间详情失败'+e.message)
+  } catch (e: any) {
+    message.error('获取空间详情失败' + e.message)
   }
 }
 
@@ -87,7 +109,7 @@ const fetchData = async () => {
   loading.value = true
   //转换搜索参数
   const params = {
-    spaceId:props.id,
+    spaceId: props.id,
     ...searchParams.value,
   }
   const res = await listPictureVoByPageUsingPost(params)
@@ -101,12 +123,12 @@ const fetchData = async () => {
 }
 
 //当页面改变的时候会调用这个函数，来更改当前的页号和页面大小
-const onPageChange = (page:number,pageSize:number)=>{
+const onPageChange = (page: number, pageSize: number) => {
   searchParams.value.current = page;
-  searchParams.value.pageSize= pageSize
+  searchParams.value.pageSize = pageSize
   fetchData()
 }
-onMounted(()=>{
+onMounted(() => {
   fetchSpaceDetail()
   fetchData()
 })
@@ -123,11 +145,42 @@ const onSearch = (newSearchParams: API.PictureQueryRequest) => {
   console.log('searchparams', searchParams.value)
   fetchData()
 }
+const onColorChange = async (color: string) => {
+  loading.value = true
+  const res = await searchPictureByColorUsingPost(
+    {
+      picColor: color,
+      spaceId: props.id
+    }
+  )
+  if (res.data.code === 0 && res.data.data) {
+    const data = res.data.data ?? []
+    dataList.value = data
+    total.value = data.length
+  } else {
+    message.error('获取数据失败' + res.data.message)
+  }
+  loading.value = false
+}
 
+// ---- 批量编辑图片 -----
+const batchEditPictureModalRef = ref()
+
+// 批量编辑图片成功
+const onBatchEditPictureSuccess = () => {
+  fetchData()
+}
+
+//打开编辑弹窗
+const doBatchEdit = () => {
+  if (batchEditPictureModalRef.value) {
+    batchEditPictureModalRef.value.openModal()
+  }
+}
 </script>
 
 <style scoped>
-#spaceDetailPage{
+#spaceDetailPage {
   margin-bottom: 16px;
 }
 

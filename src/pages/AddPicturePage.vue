@@ -16,6 +16,26 @@
         <UrlPictureUpload :onSuccess="onSuccess" :picture="picture" :spaceId="spaceId"/>
       </a-tab-pane>
     </a-tabs>
+<!--    图片编辑-->
+    <div v-if="picture" class="edit-bar">
+      <a-space size="middle">
+        <a-button :icon="h(EditOutlined)" @click="doEditPicture">编辑图片</a-button>
+        <a-button type="primary" :icon="h(FullscreenOutlined)" @click="doImagePainting">AI扩图</a-button>
+      </a-space>
+      <ImageCropper
+        ref="imageCropperRef"
+        :imageUrl="picture?.url"
+        :picture="picture"
+        :spaceId="spaceId"
+        :onSuccess="onCropSuccess"
+      />
+      <ImageOutPainting ref="imageOutPaintingRef"
+        :picture="picture"
+                        :spaceId="spaceId"
+                        :onSuccess="onImageOutPaintingSuccess"
+      />
+    </div>
+
 <!--    图片信息表单-->
     <a-form v-if="picture" name="pictureForm" layout="vertical" :model="pictureForm" @finish="handleSubmit">
       <a-form-item name="name" label="名称">
@@ -39,14 +59,16 @@
 
 <script setup lang="ts">
 import PictureUpload from "@/components/PictureUpload.vue";
-import {computed, onMounted, reactive, ref} from "vue";
+import {computed, onMounted, reactive, ref,h} from "vue";
 import {userLoginUsingPost} from "@/api/userController";
 // import router from "@/router";
 import {message} from "ant-design-vue";
 import {editPictureUsingPost, getPictureVoByIdUsingGet, listPictureTagCategoryUsingGet} from "@/api/pictureController";
 import {useRoute,useRouter} from "vue-router";
 import UrlPictureUpload from "@/components/UrlPictureUpload.vue";
-
+import { EditOutlined, FullscreenOutlined } from '@ant-design/icons-vue'
+import ImageCropper from '@/components/ImageCropper.vue'
+import ImageOutPainting from "@/components/ImageOutPainting.vue";
 
 const picture = ref<API.PictureVO>()
 const pictureForm =reactive<API.PictureEditRequest>({})
@@ -130,11 +152,38 @@ const  getOldPicture = async ()=>{
     }
   }
 }
+
+//图片编辑器引用
+const imageCropperRef = ref()
+// ----- AI 扩图引用 -----
+const imageOutPaintingRef = ref()
+
+const onCropSuccess = (newPicture:API.PictureVO) =>{
+  picture.value = newPicture
+}
+
+// AI 扩图保存事件
+const onImageOutPaintingSuccess = (newPicture: API.PictureVO) => {
+  picture.value = newPicture
+}
+const doEditPicture = async ()=>{
+  imageCropperRef.value?.openModal()
+}
+
+// 打开 AI 扩图弹窗
+const doImagePainting = async () => {
+  imageOutPaintingRef.value?.openModal()
+}
 </script>
 
 <style scoped>
 #addPicturePage{
 max-width: 720px;
   margin: 0 auto ;
+}
+
+#addPicturePage .edit-bar {
+  text-align: center;
+  margin: 16px 0;
 }
 </style>

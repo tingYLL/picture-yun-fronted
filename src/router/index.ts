@@ -12,6 +12,7 @@ import AddPictureBatchPage from '@/pages/AddPictureBatchPage.vue'
 import MySpacePage from '@/pages/MySpacePage.vue'
 import SpaceDetailPage from '@/pages/SpaceDetailPage.vue'
 import SearchPicturePage from '@/pages/SearchPicturePage.vue'
+import SpaceAnalyzePage from '@/pages/SpaceAnalyzePage.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -70,6 +71,11 @@ const router = createRouter({
       name:'空间详情',
       component:SpaceDetailPage,
       props:true
+    },
+    {
+      path:'/space_analyze',
+      name:'空间分析',
+      component:SpaceAnalyzePage
     },
     {
       path:'/picture/:id',
