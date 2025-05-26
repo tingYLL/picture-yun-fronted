@@ -23,8 +23,8 @@
             <template #actions v-if="showOp">
                 <ShareAltOutlined @click="(e) => doShare(picture, e)" />
                 <SearchOutlined @click="(e) => doSearch(picture, e)"/>
-                <EditOutlined @click="(e) => doEdit(picture, e)"/>
-                <DeleteOutlined  @click="(e) => doDelete(picture, e)" />
+                <EditOutlined v-if="canEdit" @click="(e) => doEdit(picture, e)"/>
+                <DeleteOutlined v-if="canDelete" @click="(e) => doDelete(picture, e)" />
             </template>
           </a-card>
         </a-list-item>
@@ -52,15 +52,17 @@ interface Props {
   //showOp这个参数控制每张图片card下面的编辑和删除按钮是否展示，私有图库会展示，公共图库不会展示
   showOp?:boolean
   onReload?:()=>void
+  canEdit?:boolean
+  canDelete?:boolean
 }
 
 //定义默认值
 const props = withDefaults(defineProps<Props>(), {
   dataList: () => [],
   loading: false,
-  showOp: false
-  // canEdit: false,
-  // canDelete: false,
+  showOp: false,
+  canEdit: false,
+  canDelete: false
 })
 
 const router = useRouter()
@@ -69,6 +71,14 @@ const doClickPicture = (picture:API.PictureVO)=>{
   router.push({
     path:`/picture/${picture.id}`
   })
+
+  // 通过路由解析生成完整路径
+  // const resolved = router.resolve({
+  //   path: `/picture/${picture.id}`
+  // });
+  //
+  // // 在新标签页打开路由对应的绝对路径
+  // window.open(resolved.href, '_blank');
 }
 
 const doSearch = (picture,e) =>{

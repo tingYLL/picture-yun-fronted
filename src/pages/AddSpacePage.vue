@@ -1,7 +1,7 @@
 <template>
   <div id="addSpacePage">
     <h2 style="margin-bottom: 16px">
-      {{route.query?.id?'修改空间':'创建空间'}}
+      {{ route.query?.id ? '修改' : '创建' }} {{ SPACE_TYPE_MAP[spaceType] }}
     </h2>
 <!--    空间信息表单-->
     <a-form  name="spaceForm" layout="vertical" :model="spaceForm" @finish="handleSubmit">
@@ -36,9 +36,8 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, reactive, ref} from "vue";
+import {computed, onMounted, reactive, ref} from "vue";
 import {userLoginUsingPost} from "@/api/userController";
-import router from "@/router";
 import {message} from "ant-design-vue";
 import {formatSize} from '@/utils/index'
 import {
@@ -47,10 +46,10 @@ import {
   getSpaceVoByIdUsingGet,
   listSpaceLevelUsingGet, updateSpaceUsingPost
 } from "@/api/spaceController";
-import {useRoute} from "vue-router";
+import {useRoute,useRouter} from "vue-router";
 import {
   SPACE_LEVEL_MAP,
-  SPACE_LEVEL_OPTIONS,
+  SPACE_LEVEL_OPTIONS, SPACE_TYPE_ENUM,
   SPACE_TYPE_MAP,
   SPACE_TYPE_OPTIONS,
 } from '@/constants/space'
@@ -60,7 +59,15 @@ const space = ref<API.SpaceVO>()
 const spaceForm =reactive<API.SpaceAddRequest | SpaceEditRequest>({})
 const loading = ref(false)
 const spaceLevelList = ref<API.SpaceLevel[]>([])
-
+const spaceType = computed(()=>{
+  if(route.query?.type){
+    return Number(route.query.type)
+  }else{
+    return SPACE_TYPE_ENUM.PRIVATE
+  }
+})
+const router = useRouter()
+const route = useRoute()
 //提交表单。此时相当于编辑空间信息
 const handleSubmit = async (values: any) => {
   const spaceId = space.value?.id
@@ -75,7 +82,8 @@ const handleSubmit = async (values: any) => {
   }else{
   //空间id、...values相当于展开各项
     res = await addSpaceUsingPost({
-      ...spaceForm
+      ...spaceForm,
+      spaceType:spaceType.value
     })
   }
 
@@ -106,8 +114,6 @@ onMounted(() => {
 onMounted(()=>{
   getOldSpace()
 })
-
-const route = useRoute()
 
 //获取老数据
 const  getOldSpace = async ()=>{

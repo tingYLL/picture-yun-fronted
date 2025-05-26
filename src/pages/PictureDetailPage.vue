@@ -73,7 +73,7 @@
             <a-button v-if="canEdit" :icon="h(EditOutlined)" target="_blank" type="default" @click="doEdit">
               编辑
             </a-button>
-            <a-button v-if="canEdit" :icon="h(DeleteOutlined)" target="_blank" danger @click="doDelete">
+            <a-button v-if="canDelete" :icon="h(DeleteOutlined)" target="_blank" danger @click="doDelete">
               删除
             </a-button>
           </a-space>
@@ -98,6 +98,7 @@ import {
   ShareAltOutlined
 } from '@ant-design/icons-vue'
 import {useLoginUserStore} from "@/stores/useLoginUserStore";
+import {SPACE_PERMISSION_ENUM} from "@/constants/space";
 
 
 
@@ -128,10 +129,10 @@ const  fetchPictureDetail = async ()=>{
     if(res.data.code === 0&& res.data.data){
       picture.value = res.data.data
     }else{
-      message.error('获取图片详情失败'+res.data.message)
+      message.error('获取图片详情失败，'+res.data.message)
     }
   }catch (e:any){
-    message.error('获取图片详情失败'+e.message)
+    message.error('获取图片详情失败，'+e.message)
   }
 
 }
@@ -148,17 +149,31 @@ const doEdit = ()=>{
     }
   })
 }
-const canEdit= computed(()=>{
-  const  loginUser = loginUserStore.loginUser
-  //未登录不能编辑
-  if(!loginUser.id){
-    return false
-  }
-  //仅本人或管理员可编辑
-  const user = picture.value.user || {}
-  return loginUser.id === user.id || loginUser.userRole === 'admin'
 
-})
+
+// 通用权限检查函数
+function createPermissionChecker(permission: string) {
+  return computed(() => {
+    return (picture.value.permissionList ?? []).includes(permission)
+  })
+}
+
+// 定义权限检查
+const canEdit = createPermissionChecker(SPACE_PERMISSION_ENUM.PICTURE_EDIT)
+const canDelete = createPermissionChecker(SPACE_PERMISSION_ENUM.PICTURE_DELETE)
+
+//旧版权限检测
+// const canEdit= computed(()=>{
+//   const  loginUser = loginUserStore.loginUser
+//   //未登录不能编辑
+//   if(!loginUser.id){
+//     return false
+//   }
+//   //仅本人或管理员可编辑
+//   const user = picture.value.user || {}
+//   return loginUser.id === user.id || loginUser.userRole === 'admin'
+//
+// })
 
 const doDelete = async ()=>{
   const id = picture.value.id

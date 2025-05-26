@@ -4,7 +4,7 @@
     <div class="search-bar">
       <a-input-search
         v-model:value="searchParams.searchText"
-        placeholder="从海量图片中搜索"
+        placeholder="从本站中搜索"
         enter-button="搜索"
         size="large"
         @search="doSearch"
@@ -13,7 +13,7 @@
     <!--    分类和标签筛选-->
     <a-tabs v-model:active-key="selectedCategory" @change="doSearch">
       <a-tab-pane tab="全部" key="all"></a-tab-pane>
-      <a-tab-pane v-for="category in categoryList" :tab="category" :key="category"></a-tab-pane>
+      <a-tab-pane :tab="category" :key="category" v-for="category in categoryList"></a-tab-pane>
     </a-tabs>
     <div class="tag-bar">
       <span style="margin-right: 8px">标签: </span>
@@ -28,32 +28,6 @@
         </a-checkable-tag>
       </a-space>
     </div>
-    <!--图片列表-->
-<!--    <a-list :grid="{ gutter: 16, xs: 1, sm: 2, md: 3, lg: 4, xl: 6, xxl: 6 }" :data-source="dataList" :pagination="pagination" :loading="loading">-->
-<!--      &lt;!&ndash;      作用域插槽，item是每一张图片，这里item:picture的语法是把item改名成picture，更容易阅读&ndash;&gt;-->
-<!--      <template #renderItem="{ item :picture}">-->
-<!--        <a-list-item style="padding:0">-->
-<!--          <a-card hoverable @click="doClickPicture(picture)" >-->
-<!--            <template #cover>-->
-<!--              <img :alt="picture.name" :src="picture.thumbnailUrl??picture.url" style="height: 180px;object-fit: cover"/>-->
-<!--            </template>-->
-<!--            <a-card-meta :title="picture.name">-->
-<!--              <template #description>-->
-<!--                <a-flex>-->
-<!--                  <a-tag color="green">-->
-<!--                    {{picture.category??'默认'}}-->
-<!--                  </a-tag>-->
-<!--                  <a-tag v-for="tag in picture.tags" :key="tag">-->
-<!--                    {{tag}}-->
-<!--                  </a-tag>-->
-<!--                </a-flex>-->
-<!--              </template>-->
-<!--            </a-card-meta>-->
-<!--          </a-card>-->
-<!--        </a-list-item>-->
-<!--      </template>-->
-<!--    </a-list>-->
-
 <!--    图片列表-->
     <PictureList :dataList="dataList" :loading="loading"/>
 <!--    分页-->
@@ -112,7 +86,8 @@ const fetchData = async () => {
     dataList.value = res.data.data.records ?? []
     total.value = res.data.data.total ?? 0
   } else {
-    message.error('获取数据失败，' + res.data.message)
+    // message.error('获取数据失败，' + res.data.message)
+    message.error(res.data.message)
   }
   loading.value = false
 }
@@ -121,7 +96,6 @@ const fetchData = async () => {
 onMounted(() => {
   fetchData()
 })
-
 
 //当页面改变的时候会调用这个函数，来更改当前的页号和页面大小
 const onPageChange = (page:number,pageSize:number)=>{

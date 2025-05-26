@@ -28,7 +28,7 @@ const checkUserSpace = async () => {
     userId: loginUser.id,
     current: 1,
     pageSize: 1,
-    // spaceType: SPACE_TYPE_ENUM.PRIVATE,
+    spaceType: SPACE_TYPE_ENUM.PRIVATE
   })
   if (res.data.code === 0) {
     // 如果有，则进入第一个空间
