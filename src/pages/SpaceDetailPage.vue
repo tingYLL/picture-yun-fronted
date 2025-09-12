@@ -114,7 +114,6 @@ const searchParams = ref<API.SpaceQueryRequest>({
 
 //获取空间详情
 const fetchSpaceDetail = async () => {
-
   try {
     const res = await getSpaceVoByIdUsingGet({
       id: props.id

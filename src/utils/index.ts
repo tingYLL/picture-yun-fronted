@@ -32,3 +32,13 @@ export function toHexColor(input: string) {
   // 返回标准 #RRGGBB 格式
   return `#${hexColor}`
 }
+
+/**
+ * 处理拖拽图片
+ *
+ * 需要用在 <div> 元素上，并设置 draggable="true"</div>
+ * @param event
+ */
+export function handleDragStart(event) {
+  event.preventDefault() // 阻止默认拖拽行为
+}

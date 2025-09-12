@@ -39,7 +39,7 @@ import { computed, onUnmounted, ref, watchEffect } from 'vue'
 import { uploadPictureUsingPost } from '@/api/pictureController.ts'
 import { message } from 'ant-design-vue'
 import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
-import PictureEditWebSocket from '@/utils/pictureEditWebSocket.ts'
+// import PictureEditWebSocket from '@/utils/pictureEditWebSocket.ts'
 import { SPACE_TYPE_ENUM } from '@/constants/space.ts'
 
 interface Props {

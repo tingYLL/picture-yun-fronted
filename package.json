@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "picture-build": "vite build",
     "build": "run-p type-check \"build-only {@}\" --",
     "openapi": "node openapi.config.js",
     "preview": "vite preview",
@@ -24,6 +25,7 @@
     "vue-cropper": "^1.1.4",
     "vue-echarts": "^7.0.3",
     "vue-router": "^4.4.5",
+    "vue-waterfall-plugin-next": "^2.6.5",
     "vue3-colorpicker": "^2.3.0"
   },
   "devDependencies": {
