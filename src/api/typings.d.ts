@@ -325,11 +325,17 @@ declare namespace API {
 
   type Picture = {
     category?: string
+    categoryId?: number
+    collectQuantity?: number
     createTime?: string
+    downloadQuantity?: number
     editTime?: string
+    expandStatus?: number
     id?: number
     introduction?: string
     isDelete?: number
+    isShare?: number
+    likeQuantity?: number
     name?: string
     picColor?: string
     picFormat?: string
@@ -337,16 +343,20 @@ declare namespace API {
     picScale?: number
     picSize?: number
     picWidth?: number
+    recommendScore?: number
+    resourceStatus?: number
     reviewMessage?: string
     reviewStatus?: number
     reviewTime?: string
     reviewerId?: number
+    shareQuantity?: number
     spaceId?: number
     tags?: string
     thumbnailUrl?: string
     updateTime?: string
     url?: string
     userId?: number
+    viewQuantity?: number
   }
 
   type PictureEditByBatchRequest = {
@@ -430,10 +440,18 @@ declare namespace API {
 
   type PictureVO = {
     category?: string
+    categoryId?: number
+    collectQuantity?: number
+    contextPathTemp?: string
     createTime?: string
+    downloadQuantity?: number
     editTime?: string
+    expandStatus?: number
     id?: number
     introduction?: string
+    isShare?: number
+    likeQuantity?: number
+    localEnableTemp?: boolean
     name?: string
     permissionList?: string[]
     picColor?: string
@@ -442,6 +460,10 @@ declare namespace API {
     picScale?: number
     picSize?: number
     picWidth?: number
+    portTemp?: string
+    recommendScore?: number
+    resourceStatus?: number
+    shareQuantity?: number
     spaceId?: number
     tags?: string[]
     thumbnailUrl?: string
@@ -449,6 +471,7 @@ declare namespace API {
     url?: string
     user?: UserVO
     userId?: number
+    viewQuantity?: number
   }
 
   type SearchPictureByColorRequest = {
@@ -654,17 +677,26 @@ declare namespace API {
   }
 
   type User = {
+    birthday?: string
     createTime?: string
     editTime?: string
     id?: number
+    inviteUserId?: number
     isDelete?: number
+    shareCode?: string
     updateTime?: string
     userAccount?: string
     userAvatar?: string
+    userEmail?: string
     userName?: string
     userPassword?: string
+    userPhone?: string
     userProfile?: string
     userRole?: string
+    vipCode?: string
+    vipExpireTime?: string
+    vipNnumber?: number
+    vipSign?: string
   }
 
   type UserAddRequest = {
@@ -673,6 +705,12 @@ declare namespace API {
     userName?: string
     userProfile?: string
     userRole?: string
+  }
+
+  type UserEditPasswordRequest = {
+    confirmPassword?: string
+    newPassword?: string
+    originPassword?: string
   }
 
   type UserLoginRequest = {
@@ -699,20 +737,33 @@ declare namespace API {
   }
 
   type UserUpdateRequest = {
-    id?: number
-    userAvatar?: string
-    userName?: string
-    userProfile?: string
-    userRole?: string
-  }
-
-  type UserVO = {
-    createTime?: string
+    birthday?: string
     id?: number
     userAccount?: string
     userAvatar?: string
     userName?: string
+    userPhone?: string
     userProfile?: string
     userRole?: string
+    userEmail?:String
+  }
+
+  type UserVO = {
+    birthday?: string
+    createTime?: string
+    id?: number
+    inviteUserId?: number
+    shareCode?: string
+    userAccount?: string
+    userAvatar?: string
+    userEmail?: string
+    userName?: string
+    userPhone?: string
+    userProfile?: string
+    userRole?: string
+    vipCode?: string
+    vipExpireTime?: string
+    vipNnumber?: number
+    vipSign?: string
   }
 }

@@ -105,6 +105,21 @@ export async function userLogoutUsingPost(options?: { [key: string]: any }) {
   })
 }
 
+/** editUserPassword POST /api/user/password */
+export async function editUserPasswordUsingPost(
+  body: API.UserEditPasswordRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseBoolean_>('/api/user/password', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}
+
 /** userRegister POST /api/user/register */
 export async function userRegisterUsingPost(
   body: API.UserRegisterRequest,
@@ -131,6 +146,42 @@ export async function updateUserUsingPost(
       'Content-Type': 'application/json',
     },
     data: body,
+    ...(options || {}),
+  })
+}
+
+/** uploadAvatar POST /api/user/uploadAvatar */
+export async function uploadAvatarUsingPost(
+  body: {},
+  file?: File,
+  options?: { [key: string]: any }
+) {
+  const formData = new FormData()
+
+  if (file) {
+    formData.append('file', file)
+  }
+
+  Object.keys(body).forEach((ele) => {
+    const item = (body as any)[ele]
+
+    if (item !== undefined && item !== null) {
+      if (typeof item === 'object' && !(item instanceof File)) {
+        if (item instanceof Array) {
+          item.forEach((f) => formData.append(ele, f || ''))
+        } else {
+          formData.append(ele, JSON.stringify(item))
+        }
+      } else {
+        formData.append(ele, item)
+      }
+    }
+  })
+
+  return request<API.BaseResponseString_>('/api/user/uploadAvatar', {
+    method: 'POST',
+    data: formData,
+    requestType: 'form',
     ...(options || {}),
   })
 }

@@ -1,5 +1,5 @@
 import {saveAs} from "file-saver";
-
+import { message } from 'ant-design-vue'
 export const formatSize = (size?: number) => {
   if (!size) return '未知'
   if (size < 1024) return size + ' B'
@@ -41,4 +41,37 @@ export function toHexColor(input: string) {
  */
 export function handleDragStart(event) {
   event.preventDefault() // 阻止默认拖拽行为
+}
+
+
+type ValidatorOptions = {
+  maxSizeMB?: number
+  allowedTypes?: string[]
+}
+
+export const imageValidator = (
+  file: File,
+  options: ValidatorOptions = {
+    maxSizeMB: 2,
+    allowedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
+  },
+) => {
+  // 解构配置参数
+  const { maxSizeMB = 2, allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'] } = options
+
+  // 校验图片格式
+  const isValidType = allowedTypes.includes(file.type)
+  if (!isValidType) {
+    message.error(`仅支持 ${allowedTypes.join(', ').replace(/image\//g, '')} 格式的图片`)
+    return false
+  }
+
+  // 校验图片大小
+  const isSizeValid = file.size / 1024 / 1024 < maxSizeMB
+  if (!isSizeValid) {
+    message.error(`图片大小不能超过 ${maxSizeMB}MB`)
+    return false
+  }
+
+  return true
 }

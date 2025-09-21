@@ -23,6 +23,11 @@
               <template #overlay>
                 <a-menu>
                   <a-menu-item >
+                    <router-link to="/user/profile"/>
+                    <UserOutlined />
+                    个人信息
+                  </a-menu-item>
+                  <a-menu-item >
                     <router-link to="/my_space"/>
                     <UserOutlined />
                     我的空间
