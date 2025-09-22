@@ -133,10 +133,10 @@
       >
         <a-row :gutter="16">
           <a-col :span="12">
-            <a-form-item label="用户名" name="userAccount">
+            <a-form-item label="账号" name="userAccount">
               <a-input
                 v-model:value="editUserInfoForm.userAccount"
-                placeholder="请输入用户名"
+                placeholder="请输入账号"
                 size="large"
               />
             </a-form-item>

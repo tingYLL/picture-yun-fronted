@@ -683,6 +683,7 @@ declare namespace API {
     id?: number
     inviteUserId?: number
     isDelete?: number
+    isDisabled?: number
     shareCode?: string
     updateTime?: string
     userAccount?: string
@@ -725,7 +726,9 @@ declare namespace API {
     sortField?: string
     sortOrder?: string
     userAccount?: string
+    userEmail?: string
     userName?: string
+    userPhone?: string
     userProfile?: string
     userRole?: string
   }
@@ -739,13 +742,14 @@ declare namespace API {
   type UserUpdateRequest = {
     birthday?: string
     id?: number
+    isDisabled?: number
     userAccount?: string
     userAvatar?: string
+    userEmail?: string
     userName?: string
     userPhone?: string
     userProfile?: string
     userRole?: string
-    userEmail?:String
   }
 
   type UserVO = {
@@ -753,6 +757,7 @@ declare namespace API {
     createTime?: string
     id?: number
     inviteUserId?: number
+    isDisabled?: number
     shareCode?: string
     userAccount?: string
     userAvatar?: string

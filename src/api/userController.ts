@@ -29,6 +29,21 @@ export async function deleteUserUsingPost(
   })
 }
 
+/** disabledUser POST /api/user/disabledUser */
+export async function disabledUserUsingPost(
+  body: API.UserUpdateRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseBoolean_>('/api/user/disabledUser', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}
+
 /** getUserById GET /api/user/get */
 export async function getUserByIdUsingGet(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
@@ -126,6 +141,21 @@ export async function userRegisterUsingPost(
   options?: { [key: string]: any }
 ) {
   return request<API.BaseResponseLong_>('/api/user/register', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}
+
+/** resetPassword POST /api/user/resetPassword */
+export async function resetPasswordUsingPost(
+  body: API.UserUpdateRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseString_>('/api/user/resetPassword', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
