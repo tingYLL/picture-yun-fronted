@@ -150,21 +150,6 @@ export async function userRegisterUsingPost(
   })
 }
 
-/** resetPassword POST /api/user/resetPassword */
-export async function resetPasswordUsingPost(
-  body: API.UserUpdateRequest,
-  options?: { [key: string]: any }
-) {
-  return request<API.BaseResponseString_>('/api/user/resetPassword', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
-    ...(options || {}),
-  })
-}
-
 /** updateUser POST /api/user/update */
 export async function updateUserUsingPost(
   body: API.UserUpdateRequest,

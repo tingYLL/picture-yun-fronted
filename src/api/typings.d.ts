@@ -23,6 +23,12 @@ declare namespace API {
     message?: string
   }
 
+  type BaseResponseListCategoryVO_ = {
+    code?: number
+    data?: CategoryVO[]
+    message?: string
+  }
+
   type BaseResponseListImageSearchResult_ = {
     code?: number
     data?: ImageSearchResult[]
@@ -89,9 +95,9 @@ declare namespace API {
     message?: string
   }
 
-  type BaseResponsePagePicture_ = {
+  type BaseResponsePageCategoryVO_ = {
     code?: number
-    data?: PagePicture_
+    data?: PageCategoryVO_
     message?: string
   }
 
@@ -122,12 +128,6 @@ declare namespace API {
   type BaseResponsePicture_ = {
     code?: number
     data?: Picture
-    message?: string
-  }
-
-  type BaseResponsePictureTagCategory_ = {
-    code?: number
-    data?: PictureTagCategory
     message?: string
   }
 
@@ -177,6 +177,51 @@ declare namespace API {
     code?: number
     data?: UserVO
     message?: string
+  }
+
+  type Category = {
+    createTime?: string
+    editTime?: string
+    id?: number
+    isDelete?: number
+    name?: string
+    parentId?: number
+    updateTime?: string
+    useNum?: number
+    userId?: number
+  }
+
+  type CategoryAddRequest = {
+    name?: string
+    parentId?: number
+  }
+
+  type CategoryQueryRequest = {
+    categoryId?: number
+    current?: number
+    name?: string
+    pageSize?: number
+    parentId?: number
+    sortField?: string
+    sortOrder?: string
+    useNum?: number
+    userId?: number
+  }
+
+  type CategoryUpdateRequest = {
+    id?: number
+    name?: string
+    parentId?: number
+    useNum?: number
+  }
+
+  type CategoryVO = {
+    createTime?: string
+    id?: number
+    name?: string
+    parentId?: number
+    useNum?: number
+    userId?: number
   }
 
   type CreateOutPaintingTaskResponse = {
@@ -269,10 +314,10 @@ declare namespace API {
     taskStatus?: string
   }
 
-  type PagePicture_ = {
+  type PageCategoryVO_ = {
     current?: number
     pages?: number
-    records?: Picture[]
+    records?: CategoryVO[]
     size?: number
     total?: number
   }
@@ -368,7 +413,7 @@ declare namespace API {
   }
 
   type PictureEditRequest = {
-    category?: string
+    categoryId?: number
     id?: number
     introduction?: string
     name?: string
@@ -376,7 +421,7 @@ declare namespace API {
   }
 
   type PictureQueryRequest = {
-    category?: string
+    categoryId?: number
     current?: number
     endEditTime?: string
     id?: number
@@ -412,13 +457,8 @@ declare namespace API {
     tags?: string[]
   }
 
-  type PictureTagCategory = {
-    categoryList?: string[]
-    tagList?: string[]
-  }
-
   type PictureUpdateRequest = {
-    category?: string
+    categoryId?: number
     id?: number
     introduction?: string
     name?: string
@@ -439,8 +479,9 @@ declare namespace API {
   }
 
   type PictureVO = {
-    category?: string
     categoryId?: number
+    categoryInfo?: Category
+    categoryName?: string
     collectQuantity?: number
     contextPathTemp?: string
     createTime?: string
@@ -465,7 +506,7 @@ declare namespace API {
     resourceStatus?: number
     shareQuantity?: number
     spaceId?: number
-    tags?: string[]
+    tagList?: string[]
     thumbnailUrl?: string
     updateTime?: string
     url?: string

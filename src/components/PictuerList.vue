@@ -11,13 +11,15 @@
                 <LazyImg :url="picture.thumbnailUrl??picture.url" />
               </div>
             </template>
-            <a-card-meta :title="picture.name" >
+<!--            <a-card-meta :title="picture.name" >-->
+            <a-card-meta>
               <template #description>
-                <a-flex>
-                  <a-tag color="green">
-                    {{ picture.category ?? '默认' }}
-                  </a-tag>
-                  <a-tag v-for="tag in picture.tags" :key="tag">
+<!--                可选择展示或不展示-->
+                <a-flex justify="center">
+<!--                  <a-tag color="green">-->
+<!--                    {{ picture.category ?? '默认' }}-->
+<!--                  </a-tag>-->
+                  <a-tag v-for="tag in picture.tagList" :key="tag">
                     {{ tag }}
                   </a-tag>
                 </a-flex>

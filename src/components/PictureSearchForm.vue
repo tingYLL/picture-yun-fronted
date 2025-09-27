@@ -68,9 +68,10 @@ import dayjs from 'dayjs'
 import {
   PIC_REVIEW_STATUS_OPTIONS,
 } from '../constants/picture.ts'
-import {listPictureTagCategoryUsingGet} from "@/api/pictureController";
+
+import {getCategoryListAsHomeUsingGet} from "@/api/categoryController.ts"
 import {message} from "ant-design-vue";
-const categoryOptions = ref<string[]>([])
+const categoryOptions = ref<API.CategoryVO[]>([])
 const tagOptions = ref<string[]>([])
 interface Props {
   onSearch?: (searchParams: API.PictureQueryRequest) => void
@@ -110,17 +111,10 @@ const rangePresets = ref([
   { label: '过去 90 天', value: [dayjs().add(-90, 'd'), dayjs()] },
 ])
 
-const getTagCategoryOptions  = async () =>{
-  const res=  await listPictureTagCategoryUsingGet()
+const getCategoryOptions  = async () =>{
+  const res=  await getCategoryListAsHomeUsingGet()
   if(res.data.code === 0 && res.data.data){
-    tagOptions.value = (res.data.data.tagList ?? []).map((data:string) =>{
-      return {
-        value:data,
-        label:data
-      }
-    })
-
-    categoryOptions.value = (res.data.data.categoryList?? []).map((data:string)=>{
+    categoryOptions.value = (res.data.data?? []).map((data:string)=>{
       return {
         value:data,
         label:data
@@ -144,7 +138,7 @@ const doClear = () => {
 
 
 onMounted(()=>{
-  getTagCategoryOptions()
+  getCategoryOptions()
 })
 </script>
 <style scoped>

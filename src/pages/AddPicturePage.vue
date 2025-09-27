@@ -44,8 +44,9 @@
       <a-form-item name="introduction" label="简介">
         <a-textarea v-model:value="pictureForm.introduction" placeholder="输入简介" :autoSize="{maxRows:5,minRows:2}" allow-clear />
       </a-form-item>
-      <a-form-item name="category" label="分类">
-        <a-auto-complete v-model:value="pictureForm.category" placeholder="请输入分类" allow-clear :options="categoryOptions"/>
+      <a-form-item name="categoryId" label="分类">
+<!--        <a-auto-complete v-model:value="pictureForm.category" placeholder="请输入分类" allow-clear :options="categoryOptions"/>-->
+        <a-select v-model:value="pictureForm.categoryId" placeholder="请输入分类" allow-clear :options="categoryOptions" />
       </a-form-item>
       <a-form-item name="tags" label="标签">
         <a-select v-model:value="pictureForm.tags" mode="tags" placeholder="请输入标签" allow-clear :options="tagOptions" />
@@ -63,7 +64,8 @@ import {computed, onMounted, reactive, ref,h} from "vue";
 import {userLoginUsingPost} from "@/api/userController";
 // import router from "@/router";
 import {message} from "ant-design-vue";
-import {editPictureUsingPost, getPictureVoByIdUsingGet, listPictureTagCategoryUsingGet} from "@/api/pictureController";
+import {editPictureUsingPost, getPictureVoByIdUsingGet} from "@/api/pictureController";
+import {getCategoryListAsHomeUsingGet} from '@/api/categoryController.ts'
 import {useRoute,useRouter} from "vue-router";
 import UrlPictureUpload from "@/components/UrlPictureUpload.vue";
 import { EditOutlined, FullscreenOutlined } from '@ant-design/icons-vue'
@@ -75,7 +77,7 @@ const pictureForm =reactive<API.PictureEditRequest>({})
 const uploadType = ref<'file'|'url'>('file')
 const route = useRoute()
 const router = useRouter()
-const categoryOptions = ref<string[]>([])
+const categoryOptions = ref<API.CategoryVO[]>([])
 const tagOptions = ref<string[]>([])
 const spaceId = computed(()=>{
   return route.query?.spaceId;
@@ -108,20 +110,13 @@ const handleSubmit = async (values: any) => {
   }
 };
 
-const getTagCategoryOptions  = async () =>{
-  const res=  await listPictureTagCategoryUsingGet()
+const getCategoryOptions  = async () =>{
+  const res=  await getCategoryListAsHomeUsingGet()
   if(res.data.code === 0 && res.data.data){
-    tagOptions.value = (res.data.data.tagList ?? []).map((data:string) =>{
+    categoryOptions.value = (res.data.data?? []).map((data:API.CategoryVO)=>{
       return {
-        value:data,
-        label:data
-      }
-    })
-
-    categoryOptions.value = (res.data.data.categoryList?? []).map((data:string)=>{
-      return {
-        value:data,
-        label:data
+        value:data.id,
+        label:data.name
       }
     })
   }else{
@@ -130,7 +125,7 @@ const getTagCategoryOptions  = async () =>{
 }
 
 onMounted(()=>{
-  getTagCategoryOptions()
+  getCategoryOptions()
   getOldPicture()
 })
 
@@ -147,8 +142,8 @@ const  getOldPicture = async ()=>{
       picture.value = data
       pictureForm.name = data.name
       pictureForm.introduction = data.introduction
-      pictureForm.category = data.category
-      pictureForm.tags = data.tags
+      pictureForm.categoryId = data.categoryId
+      pictureForm.tags = data.tagList
     }
   }
 }

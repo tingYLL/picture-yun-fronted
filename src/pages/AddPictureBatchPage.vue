@@ -37,9 +37,9 @@ import { onMounted, reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
 import {
   getPictureVoByIdUsingGet,
-  listPictureTagCategoryUsingGet,
   uploadPictureByBatchUsingPost,
 } from '@/api/pictureController.ts'
+import {getCategoryListAsHomeUsingGet} from '@/api/categoryController.ts'
 import { useRoute, useRouter } from 'vue-router'
 
 const formData = reactive<API.PictureUploadByBatchRequest>({

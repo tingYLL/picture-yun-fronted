@@ -38,9 +38,9 @@
 <script lang="ts" setup>
 import { onMounted, reactive, ref } from 'vue'
 import {
-  editPictureByBatchUsingPost,
-  listPictureTagCategoryUsingGet,
+  editPictureByBatchUsingPost
 } from '@/api/pictureController.ts'
+import {getCategoryListAsHomeUsingGet} from '@/api/categoryController.ts'
 import { message } from 'ant-design-vue'
 
 interface Props {
@@ -106,15 +106,9 @@ const tagOptions = ref<string[]>([])
  * @param values
  */
 const getTagCategoryOptions = async () => {
-  const res = await listPictureTagCategoryUsingGet()
+  const res = await getCategoryListAsHomeUsingGet()
   if (res.data.code === 0 && res.data.data) {
-    tagOptions.value = (res.data.data.tagList ?? []).map((data: string) => {
-      return {
-        value: data,
-        label: data,
-      }
-    })
-    categoryOptions.value = (res.data.data.categoryList ?? []).map((data: string) => {
+    categoryOptions.value = (res.data.data ?? []).map((data: string) => {
       return {
         value: data,
         label: data,

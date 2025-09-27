@@ -10,6 +10,7 @@
           enter-button="搜索"
           size="large"
           @search="doSearch"
+          allow-clear
         />
       </div>
     </div>
@@ -17,22 +18,8 @@
     <!--    分类和标签筛选-->
     <a-tabs v-model:active-key="selectedCategory" @change="doSearch">
       <a-tab-pane tab="全部" key="all"></a-tab-pane>
-      <a-tab-pane :tab="category" :key="category" v-for="category in categoryList"></a-tab-pane>
+      <a-tab-pane :tab="category.name" :key="category.id" v-for="category in categoryList"></a-tab-pane>
     </a-tabs>
-    <div class="tag-bar">
-      <span style="margin-right: 8px">标签: </span>
-      <a-space :size="[0, 8]" wrap>
-        <a-checkable-tag
-          v-for="(tag, index) in tagList"
-          :key="tag"
-          v-model:checked="selectedTagList[index]"
-          @change="doSearch"
-        >
-          {{ tag }}
-        </a-checkable-tag>
-      </a-space>
-    </div>
-
 
     <div v-if="homeLoading" class="loading-spinner">
       <a-spin size="large" tip="加载中..." />
@@ -57,19 +44,16 @@
 </template>
 <script setup lang="ts">
 import {computed, onMounted, reactive, ref} from "vue";
-import {listPictureTagCategoryUsingGet, listPictureVoByPageUsingPost} from "@/api/pictureController";
+import { listPictureVoByPageUsingPost} from "@/api/pictureController";
+import { getCategoryListAsHomeUsingGet } from '@/api/categoryController.ts'
 import { Empty, message } from 'ant-design-vue'
 import {useRouter} from "vue-router";
 import PictureList from '@/components/PictuerList.vue'
 
 // 定义数据
 const dataList = ref<API.PictureVO[]>([])
-const total = ref(0)
-const loading = ref(true)
-const categoryList = ref<string[]>([])
-const tagList = ref<string[]>([])
+const categoryList = ref<API.CategoryVO[]>([])
 const selectedCategory = ref<string>('all')
-const selectedTagList = ref<boolean []>([])
 
 //加载中..
 const homeLoading = ref(true)
@@ -102,18 +86,13 @@ const getHomePictureList = async () => {
   //转换搜索参数
   const params = {
     ...searchParams,
-    tags:[] as string[]
   }
   //
   if(selectedCategory.value !== 'all'){
-    params.category = selectedCategory.value
+    params.categoryId = selectedCategory.value
+  }else {
+    params.categoryId = undefined
   }
-  //遍历标签数组，将被选中的标签放入查询参数中
-  selectedTagList.value.forEach((useTag,index)=>{
-    if(useTag){
-      params.tags.push(tagList.value[index])
-    }
-  })
 
   const res = await listPictureVoByPageUsingPost(params)
   if (res.data.code === 0 && res.data.data) {
@@ -144,7 +123,7 @@ const getHomePictureList = async () => {
  */
 onMounted(() => {
   window.addEventListener('scroll', checkSticky)
-  getTagCategoryOptions()
+  getCategoryOptions()
   // 延迟执行初始图片加载，确保DOM已准备好
   setTimeout(() => {
     getHomePictureList()
@@ -155,12 +134,10 @@ onMounted(() => {
 const doSearch = ()=>{
   homeLoading.value = true
   searchParams.current = 1
-  // 处理分类
   if (selectedCategory.value !== 'all') {
-    searchParams.category = selectedCategory.value
+    searchParams.categoryId = selectedCategory.value
   } else {
-    // 如果选择“全部”,相当于不加额外的搜索条件
-    searchParams.category = undefined
+    searchParams.categoryId = undefined
   }
   loadingFinish.value = false
   showBottomLine.value = false
@@ -169,13 +146,11 @@ const doSearch = ()=>{
 }
 
 
-const getTagCategoryOptions  = async () =>{
-  const res=  await listPictureTagCategoryUsingGet()
+const getCategoryOptions  = async () =>{
+  const res=  await getCategoryListAsHomeUsingGet()
   //操作成功
   if(res.data.code === 0 && res.data.data){
-    tagList.value = (res.data.data.tagList ?? [])
-
-    categoryList.value = (res.data.data.categoryList?? [])
+    categoryList.value = (res.data.data?? [])
   }else{
     message.error('获取标签分页列表失败'+res.data.message)
   }

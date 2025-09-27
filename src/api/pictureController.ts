@@ -82,7 +82,7 @@ export async function listPictureByPageUsingPost(
   body: API.PictureQueryRequest,
   options?: { [key: string]: any }
 ) {
-  return request<API.BaseResponsePagePicture_>('/api/picture/list/page', {
+  return request<API.BaseResponsePagePictureVO_>('/api/picture/list/page', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -199,14 +199,6 @@ export async function searchPictureByPictureUsingPost(
       'Content-Type': 'application/json',
     },
     data: body,
-    ...(options || {}),
-  })
-}
-
-/** listPictureTagCategory GET /api/picture/tag_category */
-export async function listPictureTagCategoryUsingGet(options?: { [key: string]: any }) {
-  return request<API.BaseResponsePictureTagCategory_>('/api/picture/tag_category', {
-    method: 'GET',
     ...(options || {}),
   })
 }

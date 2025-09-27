@@ -127,7 +127,7 @@ import {
   deleteUserUsingPost,
   disabledUserUsingPost,
   listUserVoByPageUsingPost,
-  resetPasswordUsingPost
+  // resetPasswordUsingPost
 } from '@/api/userController.ts'
 import dayjs from 'dayjs'
 import { ContactsOutlined, SearchOutlined, SyncOutlined ,TeamOutlined} from '@ant-design/icons-vue'

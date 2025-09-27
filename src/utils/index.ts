@@ -75,3 +75,20 @@ export const imageValidator = (
 
   return true
 }
+
+
+export function formatNumber(value: number): string {
+  if (value < 1000) {
+    return value.toString()
+  }
+
+  const kValue = value / 1000
+  // 保留两位小数并移除末尾的零
+  let formatted = kValue.toFixed(2).replace(/\.?0+$/, '')
+  // 处理如 "2." 变成 "2" 的情况
+  if (formatted.endsWith('.')) {
+    formatted = formatted.slice(0, -1)
+  }
+
+  return `${formatted}k`
+}

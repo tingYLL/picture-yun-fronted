@@ -24,10 +24,12 @@
               {{ picture.introduction ?? '-' }}
             </a-descriptions-item>
             <a-descriptions-item label="分类">
-              {{ picture.category ?? '默认' }}
+              <a-tag>
+                {{ picture.categoryInfo?.name ?? '默认' }}
+              </a-tag>
             </a-descriptions-item>
             <a-descriptions-item label="标签">
-              <a-tag v-for="tag in picture.tags" :key="tag">
+              <a-tag v-for="tag in picture.tagList??[]" :key="tag">
                 {{ tag }}
               </a-tag>
             </a-descriptions-item>
