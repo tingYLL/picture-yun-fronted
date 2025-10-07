@@ -9,6 +9,7 @@ import * as pictureController from './pictureController'
 import * as spaceController from './spaceController'
 import * as spaceAnalyzeController from './spaceAnalyzeController'
 import * as spaceUserController from './spaceUserController'
+import * as scheduledTaskController from './scheduledTaskController'
 import * as userController from './userController'
 export default {
   categoryController,
@@ -18,5 +19,6 @@ export default {
   spaceController,
   spaceAnalyzeController,
   spaceUserController,
+  scheduledTaskController,
   userController,
 }

@@ -107,6 +107,12 @@ declare namespace API {
     message?: string
   }
 
+  type BaseResponsePageScheduledTaskVO_ = {
+    code?: number
+    data?: PageScheduledTaskVO_
+    message?: string
+  }
+
   type BaseResponsePageSpace_ = {
     code?: number
     data?: PageSpace_
@@ -199,11 +205,14 @@ declare namespace API {
   type CategoryQueryRequest = {
     categoryId?: number
     current?: number
+    multipleSort?: boolean
     name?: string
     pageSize?: number
     parentId?: number
+    sort?: Sort
     sortField?: string
     sortOrder?: string
+    sorts?: Sort[]
     useNum?: number
     userId?: number
   }
@@ -330,6 +339,14 @@ declare namespace API {
     total?: number
   }
 
+  type PageScheduledTaskVO_ = {
+    current?: number
+    pages?: number
+    records?: ScheduledTaskVO[]
+    size?: number
+    total?: number
+  }
+
   type PageSpace_ = {
     current?: number
     pages?: number
@@ -420,12 +437,19 @@ declare namespace API {
     tags?: string[]
   }
 
+  type PictureInteractionRequest = {
+    interactionStatus?: number
+    interactionType?: number
+    pictureId?: number
+  }
+
   type PictureQueryRequest = {
     categoryId?: number
     current?: number
     endEditTime?: string
     id?: number
     introduction?: string
+    multipleSort?: boolean
     name?: string
     nullSpaceId?: boolean
     pageSize?: number
@@ -439,8 +463,10 @@ declare namespace API {
     reviewTime?: string
     reviewerId?: number
     searchText?: string
+    sort?: Sort
     sortField?: string
     sortOrder?: string
+    sorts?: Sort[]
     spaceId?: number
     startEditTime?: string
     tags?: string[]
@@ -493,6 +519,8 @@ declare namespace API {
     isShare?: number
     likeQuantity?: number
     localEnableTemp?: boolean
+    loginUserIsCollect?: boolean
+    loginUserIsLike?: boolean
     name?: string
     permissionList?: string[]
     picColor?: string
@@ -504,6 +532,10 @@ declare namespace API {
     portTemp?: string
     recommendScore?: number
     resourceStatus?: number
+    reviewMessage?: string
+    reviewStatus?: number
+    reviewTime?: string
+    reviewerId?: number
     shareQuantity?: number
     spaceId?: number
     tagList?: string[]
@@ -515,6 +547,54 @@ declare namespace API {
     viewQuantity?: number
   }
 
+  type ScheduledTaskAddRequest = {
+    taskBean?: string
+    taskCron?: string
+    taskDesc?: string
+    taskName?: string
+  }
+
+  type ScheduledTaskQueryRequest = {
+    createTime?: string
+    current?: number
+    editTime?: string
+    id?: number
+    multipleSort?: boolean
+    pageSize?: number
+    sort?: Sort
+    sortField?: string
+    sortOrder?: string
+    sorts?: Sort[]
+    taskBean?: string
+    taskCron?: string
+    taskDesc?: string
+    taskKey?: string
+    taskName?: string
+    taskStatus?: number
+  }
+
+  type ScheduledTaskUpdateRequest = {
+    id?: number
+    taskBean?: string
+    taskCron?: string
+    taskDesc?: string
+    taskKey?: string
+    taskName?: string
+    taskStatus?: number
+  }
+
+  type ScheduledTaskVO = {
+    createTime?: string
+    editTime?: string
+    id?: number
+    taskBean?: string
+    taskCron?: string
+    taskDesc?: string
+    taskKey?: string
+    taskName?: string
+    taskStatus?: number
+  }
+
   type SearchPictureByColorRequest = {
     picColor?: string
     spaceId?: number
@@ -522,6 +602,11 @@ declare namespace API {
 
   type SearchPictureByPictureRequest = {
     pictureId?: number
+  }
+
+  type Sort = {
+    asc?: boolean
+    field?: string
   }
 
   type Space = {
@@ -573,9 +658,12 @@ declare namespace API {
   type SpaceQueryRequest = {
     current?: number
     id?: number
+    multipleSort?: boolean
     pageSize?: number
+    sort?: Sort
     sortField?: string
     sortOrder?: string
+    sorts?: Sort[]
     spaceLevel?: number
     spaceName?: string
     spaceType?: number
@@ -763,9 +851,12 @@ declare namespace API {
   type UserQueryRequest = {
     current?: number
     id?: number
+    multipleSort?: boolean
     pageSize?: number
+    sort?: Sort
     sortField?: string
     sortOrder?: string
+    sorts?: Sort[]
     userAccount?: string
     userEmail?: string
     userName?: string

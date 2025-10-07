@@ -8,9 +8,9 @@
           <router-view />
         </a-layout-content>
       </a-layout>
-      <a-layout-footer class="footer">
-        <a href="#" target="_blank">熊Bee云图库 by 红岑</a>
-      </a-layout-footer>
+<!--      <a-layout-footer class="footer">-->
+<!--        <a href="#" target="_blank">啵哩啵哩 by 蒙古上单</a>-->
+<!--      </a-layout-footer>-->
     </a-layout>
   </div>
 </template>

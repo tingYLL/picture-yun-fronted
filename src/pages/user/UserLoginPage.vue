@@ -1,6 +1,6 @@
 <template>
   <div id="userLoginPage">
-    <h2 class="title">熊Bee云图库 - 用户登录</h2>
+    <h2 class="title">啵哩啵哩 - 用户登录</h2>
     <div class="desc">企业级智能协同云图库</div>
     <a-form
       :model="formState"

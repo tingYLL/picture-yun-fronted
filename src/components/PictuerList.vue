@@ -11,25 +11,37 @@
                 <LazyImg :url="picture.thumbnailUrl??picture.url" />
               </div>
             </template>
-<!--            <a-card-meta :title="picture.name" >-->
-            <a-card-meta>
-              <template #description>
-<!--                可选择展示或不展示-->
-                <a-flex justify="center">
-<!--                  <a-tag color="green">-->
-<!--                    {{ picture.category ?? '默认' }}-->
+<!--            <a-card-meta v-if="picture.tagList && picture.tagList.length > 0">-->
+<!--              <template #description>-->
+<!--                <a-flex justify="center">-->
+<!--                  <a-tag v-for="tag in picture.tagList" :key="tag">-->
+<!--                    {{ tag }}-->
 <!--                  </a-tag>-->
-                  <a-tag v-for="tag in picture.tagList" :key="tag">
-                    {{ tag }}
-                  </a-tag>
-                </a-flex>
-              </template>
-            </a-card-meta>
-            <template #actions v-if="showOp">
-              <ShareAltOutlined @click="(e) => doShare(picture, e)" />
-              <SearchOutlined @click="(e) => doSearch(picture, e)" />
-              <EditOutlined v-if="canEdit" @click="(e) => doEdit(picture, e)" />
-              <DeleteOutlined v-if="canDelete" @click="(e) => doDelete(picture, e)" />
+<!--                </a-flex>-->
+<!--              </template>-->
+<!--            </a-card-meta>-->
+            <template #actions>
+              <div>
+                <EyeOutlined />
+                {{ formatNumber(picture.viewQuantity) }}
+              </div>
+              <div @click="(e) => doLike(picture)">
+                <LikeFilled v-if="picture.loginUserIsLike" />
+                <LikeOutlined v-else />
+                {{ formatNumber(picture.likeQuantity) }}
+              </div>
+              <div @click="(e) => doCollect(picture)">
+                <StarFilled v-if="picture.loginUserIsCollect" />
+                <StarOutlined v-else />
+                {{ formatNumber(picture.collectQuantity) }}
+              </div>
+              <div  @click="(e) => doSharePicture(picture)">
+                <ShareAltOutlined />
+                {{ formatNumber(picture.shareQuantity) }}
+              </div>
+<!--              <div @click="(e) => doSearchPicture(picture)">-->
+<!--                <SearchOutlined />-->
+<!--              </div>-->
             </template>
           </a-card>
       </template>
@@ -41,17 +53,21 @@
 import { useRouter } from 'vue-router'
 import { LazyImg, Waterfall } from 'vue-waterfall-plugin-next'
 import 'vue-waterfall-plugin-next/dist/style.css'
+
 import {
   DeleteOutlined,
   EditOutlined,
   SearchOutlined,
   ShareAltOutlined,
+  EyeOutlined,LikeFilled,LikeOutlined,StarFilled,StarOutlined
 } from '@ant-design/icons-vue'
-import { deletePictureUsingPost } from '@/api/pictureController'
+import { deletePictureUsingPost, pictureLikeOrCollectUsingPost,pictureShareUsingPost } from '@/api/pictureController'
 import { message } from 'ant-design-vue'
 import ShareModal from './ShareModal.vue'
 import { ref,onMounted,onUnmounted } from 'vue'
-import { handleDragStart } from '@/utils'
+import { handleDragStart,formatNumber } from '@/utils'
+import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
+import { PIC_INTERACTION_TYPE_ENUM } from '@/constants/picture.ts'
 
 interface Props {
   dataList?: API.PictureVO[]
@@ -125,6 +141,98 @@ const doDelete = async (picture, e) => {
     props.onReload?.()
   } else {
     message.error('删除失败')
+  }
+}
+/**
+ * 点赞状态
+ */
+const isLike = ref<boolean>(true)
+/**
+ * 处理点赞
+ */
+const doLike = async (picture: API.PictureVO) => {
+  // useLoginUserStore().checkLogin()
+  if (!isLike.value) {
+    message.warn('点太快啦！')
+    return
+  }
+  const res = await pictureLikeOrCollectUsingPost({
+    pictureId: picture.id,
+    interactionType: PIC_INTERACTION_TYPE_ENUM.LIKE,
+    interactionStatus: picture.loginUserIsLike ? 1 : 0,
+  })
+  if (res.data.code === 0 && res.data.data) {
+    message.success(`${picture.loginUserIsLike ? '取消点赞！' : '点赞成功！'}`)
+    picture.loginUserIsLike ? picture.likeQuantity-- : picture.likeQuantity++
+    picture.loginUserIsLike = !picture.loginUserIsLike
+    isLike.value = false
+    setTimeout(() => {
+      isLike.value = true
+    }, 2000)
+  } else {
+    message.error(res.data.message)
+  }
+}
+
+/**
+ * 收藏状态
+ */
+const isCollect = ref<boolean>(true)
+/**
+ * 处理收藏
+ */
+const doCollect = async (picture: API.PictureVO) => {
+  // useLoginUserStore().checkLogin()
+  if (!isCollect.value) {
+    message.warn('点太快啦！')
+    return
+  }
+  const res = await pictureLikeOrCollectUsingPost({
+    pictureId: picture.id,
+    interactionType: PIC_INTERACTION_TYPE_ENUM.COLLECT,
+    interactionStatus: picture.loginUserIsCollect ? 1 : 0,
+  })
+  if (res.data.code === 0 && res.data.data) {
+    message.success(`${picture.loginUserIsCollect ? '取消收藏！' : '收藏成功！'}`)
+    picture.loginUserIsCollect ? picture.collectQuantity-- : picture.collectQuantity++
+    picture.loginUserIsCollect = !picture.loginUserIsCollect
+    isCollect.value = false
+    setTimeout(() => {
+      isCollect.value = true
+    }, 2000)
+  } else {
+    message.error(res.data.message)
+  }
+}
+
+/**
+ * 分享状态
+ */
+const isShare = ref<boolean>(true)
+/**
+ * 处理分享
+ * @param picture
+ * @param e
+ */
+
+const doSharePicture = async (picture: API.PictureVO, e: Event) => {
+  // useLoginUserStore().checkLogin()
+  if (!isShare.value) {
+    message.warn('已分享！')
+    return
+  }
+  const pictureId = picture.id
+  const res = await pictureShareUsingPost({ pictureId })
+  if (res.data.code === 0 && res.data.data) {
+    shareLink.value = `${window.location.protocol}//${window.location.host}/picture/detail/${pictureId}`
+    if (shareModalRef.value) {
+      shareModalRef.value.openModal()
+    }
+    setTimeout(() => {
+      isShare.value = true
+    }, 3000)
+  } else {
+    message.error(res.data.message)
   }
 }
 

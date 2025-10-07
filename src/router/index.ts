@@ -16,6 +16,8 @@ import SpaceAnalyzePage from '@/pages/SpaceAnalyzePage.vue'
 import SpaceUserManagePage from '@/pages/admin/SpaceUserManagePage.vue'
 import UserProfilePage from '@/pages/user/UserProfilePage.vue'
 import CategoryManagePage from '@/pages/admin/CategoryManagePage.vue'
+import ScheduledTaskManagePage from '@/pages/admin/ScheduledTaskManagePage.vue'
+import PictureReleaseListPage from '@/pages/PictureReleaseListPage.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -55,6 +57,11 @@ const router = createRouter({
       component: CategoryManagePage,
     },
     {
+      path: '/admin/scheduledTask',
+      name: '定时任务',
+      component: ScheduledTaskManagePage,
+    },
+    {
       path:'/spaceUserManage/:id',
       name:'空间成员管理',
       component:SpaceUserManagePage,
@@ -64,6 +71,11 @@ const router = createRouter({
       path:'/add_picture',
       name:'创建图片',
       component:AddPicturePage
+    },
+    {
+      path: '/picture/list',
+      name: '发布列表',
+      component: PictureReleaseListPage,
     },
     {
       path:'/add_picture/batch',

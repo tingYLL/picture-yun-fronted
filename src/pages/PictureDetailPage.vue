@@ -3,8 +3,42 @@
     <a-row :gutter="[16,16]">
 <!--      图片预览-->
       <a-col :sm="24" :md="16" :xl="18">
-        <a-card title="图片预览">
-          <a-image :src="picture.url" style="max-height: 600px;object-fit: contain"/>
+        <a-card  :headStyle="{ 'text-align': 'center' }" :title="picture.name">
+          <template #extra>
+            <a-flex>
+              <div
+                @click="(e) => doDownload"
+              >
+                <a-button type="dashed">
+                  <DownloadOutlined />
+                   {{ formatNumber(downloadCount) }} 人下载
+                </a-button>
+              </div>
+            </a-flex>
+          </template>
+          <div class="image-detail-content">
+            <a-image :src="picture.url" style="max-height: 600px;object-fit: contain"/>
+          </div>
+          <template #actions>
+            <div>
+              <EyeOutlined />
+              {{ formatNumber(viewCount) }}
+            </div>
+            <div @click="(e) => doLike(picture, e)">
+              <LikeFilled v-if="picture.loginUserIsLike" />
+              <LikeOutlined v-else />
+              {{ formatNumber(likeCount) }}
+            </div>
+            <div @click="(e) => doCollect(picture, e)">
+              <StarFilled v-if="picture.loginUserIsCollect" />
+              <StarOutlined v-else />
+              {{ formatNumber(collectCount) }}
+            </div>
+            <div @click="(e) => doSharePicture(picture, e)">
+              <ShareAltOutlined />
+              {{ formatNumber(shareCount) }}
+            </div>
+          </template>
         </a-card>
       </a-col>
 <!--      图片信息区域-->
@@ -24,52 +58,52 @@
               {{ picture.introduction ?? '-' }}
             </a-descriptions-item>
             <a-descriptions-item label="分类">
-              <a-tag>
+              <a-tag color="green">
                 {{ picture.categoryInfo?.name ?? '默认' }}
               </a-tag>
             </a-descriptions-item>
-            <a-descriptions-item label="标签">
-              <a-tag v-for="tag in picture.tagList??[]" :key="tag">
+            <a-descriptions-item v-if="picture.tagList?.length" label="标签" >
+              <a-tag v-for="tag in picture.tagList" :key="tag">
                 {{ tag }}
               </a-tag>
             </a-descriptions-item>
-            <a-descriptions-item label="格式">
-              {{ picture.picFormat ?? '-' }}
+            <a-descriptions-item label="格式" >
+              <a-tag color="cyan" v-if="picture.picFormat">
+                {{ picture.picFormat  }}
+              </a-tag>
+              <span v-else>-</span>
             </a-descriptions-item>
-            <a-descriptions-item label="宽度">
-              {{ picture.picWidth ?? '-' }}
+            <a-descriptions-item label="分辨率">
+              {{ picture.picWidth}} × {{ picture.picHeight }}
             </a-descriptions-item>
-            <a-descriptions-item label="高度">
-              {{ picture.picHeight ?? '-' }}
-            </a-descriptions-item>
-            <a-descriptions-item label="宽高比">
-              {{ picture.picScale ?? '-' }}
-            </a-descriptions-item>
+<!--            <a-descriptions-item label="宽高比">-->
+<!--              {{ picture.picScale ?? '-' }}-->
+<!--            </a-descriptions-item>-->
             <a-descriptions-item label="大小">
               {{ formatSize(picture.picSize) }}
             </a-descriptions-item>
-            <a-descriptions-item label="主色调">
-              <a-space>
-                {{ picture.picColor ?? '-' }}
-                <div
-                  v-if="picture.picColor"
-                  :style="{
-                    width: '16px',
-                    height: '16px',
-                    backgroundColor: toHexColor(picture.picColor),
-                  }"
-                />
-              </a-space>
-            </a-descriptions-item>
+<!--            <a-descriptions-item label="主色调">-->
+<!--              <a-space>-->
+<!--                {{ picture.picColor ?? '-' }}-->
+<!--                <div-->
+<!--                  v-if="picture.picColor"-->
+<!--                  :style="{-->
+<!--                    width: '16px',-->
+<!--                    height: '16px',-->
+<!--                    backgroundColor: toHexColor(picture.picColor),-->
+<!--                  }"-->
+<!--                />-->
+<!--              </a-space>-->
+<!--            </a-descriptions-item>-->
           </a-descriptions>
           <a-space wrap>
             <a-button type="primary" @click="doDownload">
-              免费下载
+              下载
               <template #icon>
                 <DownloadOutlined />
               </template>
             </a-button>
-            <a-button  :icon="h(ShareAltOutlined)"  type="primary" ghost @click="doShare">
+            <a-button  :icon="h(ShareAltOutlined)"  type="primary" ghost @click="doSharePicture(picture, e)">
               分享
             </a-button>
             <a-button v-if="canEdit" :icon="h(EditOutlined)" target="_blank" type="default" @click="doEdit">
@@ -87,20 +121,23 @@
 </template>
 <script setup lang="ts">
 import {computed, defineProps, h, onMounted, reactive, ref} from "vue";
-import {deletePictureUsingPost, getPictureVoByIdUsingGet} from "@/api/pictureController";
+import {deletePictureUsingPost, getPictureVoByIdUsingGet,
+  pictureLikeOrCollectUsingPost,pictureShareUsingPost,
+  pictureDownloadUsingPost} from "@/api/pictureController";
 import {useRoute, useRouter} from "vue-router";
 import {message} from "ant-design-vue";
 import {downloadImage, formatSize,toHexColor} from '@/utils/index'
 import ShareModal from '@/components/ShareModal.vue'
-
+import {formatNumber} from '@/utils/index'
 import {
   DeleteOutlined,
   EditOutlined,
   DownloadOutlined,
-  ShareAltOutlined
+  ShareAltOutlined,EyeOutlined,LikeFilled,LikeOutlined,StarFilled,StarOutlined
 } from '@ant-design/icons-vue'
 import {useLoginUserStore} from "@/stores/useLoginUserStore";
 import {SPACE_PERMISSION_ENUM} from "@/constants/space";
+import { PIC_INTERACTION_TYPE_ENUM } from '@/constants/picture.ts'
 
 
 
@@ -189,14 +226,157 @@ const doDelete = async ()=>{
     message.error('删除失败')
   }
 }
+/**
+ * 下载状态
+ */
+const isDownload = ref<boolean>(true)
+const doDownload = async () => {
+  if (!isDownload.value) {
+    message.warn('重复下载！')
+    return
+  }
+  const res = await pictureDownloadUsingPost({pictureId: picture.value.id})
+  if (res.data.code === 0 && res.data.data) {
+    await downloadImage(picture.value.url)
+    message.success('下载成功！')
+    fetchPictureDetail()
+    isDownload.value = false
+    setTimeout(() => {
+      isDownload.value = true
+    }, 3000)
+  } else {
+    message.error(res.data.message)
+  }
 
-const doDownload = ()=>{
-  downloadImage(picture.value.url)
 }
 
 onMounted(()=>{
   fetchPictureDetail()
 })
+
+/**
+ * 查看数量
+ */
+const viewCount = computed(() => {
+  return `${picture.value.viewQuantity ?? 0}`
+})
+/**
+ * 点赞数量
+ */
+const likeCount = computed(() => {
+  return `${picture.value.likeQuantity ?? 0}`
+})
+/**
+ * 收藏数量
+ */
+const collectCount = computed(() => {
+  return `${picture.value.collectQuantity ?? 0}`
+})
+/**
+ * 分享数量
+ */
+const shareCount = computed(() => {
+  return `${picture.value.shareQuantity ?? 0}`
+})
+/**
+ * 下载数量
+ */
+const downloadCount = computed(() => {
+  return `${picture.value.downloadQuantity ?? 0}`
+})
+
+/**
+ * 点赞状态
+ */
+const isLike = ref<boolean>(true)
+/**
+ * 处理点赞
+ */
+const doLike = async (picture: API.PictureVO) => {
+  // useLoginUserStore().checkLogin()
+  if (!isLike.value) {
+    message.warn('点太快啦！')
+    return
+  }
+  const res = await pictureLikeOrCollectUsingPost({
+    pictureId: picture.id,
+    interactionType: PIC_INTERACTION_TYPE_ENUM.LIKE,
+    interactionStatus: picture.loginUserIsLike ? 1 : 0,
+  })
+  if (res.data.code === 0 && res.data.data) {
+    message.success(`${picture.loginUserIsLike ? '取消点赞！' : '点赞成功！'}`)
+    picture.loginUserIsLike ? picture.likeQuantity-- : picture.likeQuantity++
+    picture.loginUserIsLike = !picture.loginUserIsLike
+    isLike.value = false
+    setTimeout(() => {
+      isLike.value = true
+    }, 2000)
+  } else {
+    message.error(res.data.message)
+  }
+}
+
+/**
+ * 收藏状态
+ */
+const isCollect = ref<boolean>(true)
+/**
+ * 处理收藏
+ */
+const doCollect = async (picture: API.PictureVO) => {
+  // useLoginUserStore().checkLogin()
+  if (!isCollect.value) {
+    message.warn('点太快啦！')
+    return
+  }
+  const res = await pictureLikeOrCollectUsingPost({
+    pictureId: picture.id,
+    interactionType: PIC_INTERACTION_TYPE_ENUM.COLLECT,
+    interactionStatus: picture.loginUserIsCollect ? 1 : 0,
+  })
+  if (res.data.code === 0 && res.data.data) {
+    message.success(`${picture.loginUserIsCollect ? '取消收藏！' : '收藏成功！'}`)
+    picture.loginUserIsCollect ? picture.collectQuantity-- : picture.collectQuantity++
+    picture.loginUserIsCollect = !picture.loginUserIsCollect
+    isCollect.value = false
+    setTimeout(() => {
+      isCollect.value = true
+    }, 2000)
+  } else {
+    message.error(res.data.message)
+  }
+}
+
+/**
+ * 分享状态
+ */
+const isShare = ref<boolean>(true)
+/**
+ * 处理分享
+ * @param picture
+ * @param e
+ */
+
+const doSharePicture = async (picture: API.PictureVO, e: Event) => {
+  // useLoginUserStore().checkLogin()
+  if (!isShare.value) {
+    message.warn('已分享！')
+    return
+  }
+  const pictureId = picture.id
+  const res = await pictureShareUsingPost({ pictureId })
+  if (res.data.code === 0 && res.data.data) {
+    shareLink.value = `${window.location.protocol}//${window.location.host}/picture/detail/${pictureId}`
+    if (shareModalRef.value) {
+      shareModalRef.value.openModal()
+    }
+    setTimeout(() => {
+      isShare.value = true
+    }, 3000)
+  } else {
+    message.error(res.data.message)
+  }
+}
 
 // ----- 分享操作 ----
 const shareModalRef = ref()
@@ -213,8 +393,34 @@ const doShare = () => {
 
 <style scoped>
 #pictureDetailPage{
-margin-bottom: 16px;
+  margin-bottom: 16px;
 }
 
+#pictureDetailPage .image-detail-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 100px; /* 最小高度 */
+  max-height: 80vh; /* 最大高度为视口的80% */
+  overflow: hidden; /* 确保不会溢出 */
+}
+/* 图片样式：完全自适应 */
+.image-detail-content :deep(.ant-image) {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.image-detail-content :deep(.ant-image .ant-image-img) {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 70vh; /* 与容器一致 */
+  object-fit: scale-down; /* 关键修改：使用scale-down */
+  margin: 0 auto;
+  transition: transform 0.3s ease;
+}
 </style>
 

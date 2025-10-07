@@ -1,4 +1,5 @@
 import {saveAs} from "file-saver";
+import CryptoJS from 'crypto-js'
 import { message } from 'ant-design-vue'
 export const formatSize = (size?: number) => {
   if (!size) return '未知'
@@ -6,7 +7,25 @@ export const formatSize = (size?: number) => {
   if (size < 1024 * 1024) return (size / 1024).toFixed(2) + ' KB'
   return (size / (1024 * 1024)).toFixed(2) + ' MB'
 }
+/**
+ * 加密函数
+ * @param data
+ * @param key
+ */
+export function encrypt(data, key) {
+  const encrypted = CryptoJS.AES.encrypt(data, key)
+  return encrypted.toString()
+}
 
+/**
+ * 解密函数
+ * @param ciphertext
+ * @param key
+ */
+export function decrypt(ciphertext, key) {
+  const bytes = CryptoJS.AES.decrypt(ciphertext, key)
+  return bytes.toString(CryptoJS.enc.Utf8)
+}
 /**
  * 下载图片
  * @param url 图片下载地址
@@ -91,4 +110,28 @@ export function formatNumber(value: number): string {
   }
 
   return `${formatted}k`
+}
+
+/**
+ * 格式化文件大小
+ * @param size 大小
+ */
+export const formatPictureSize = (size?: number) => {
+  if (!size) return '未知'
+  if (size < 1024) return size + ' B'
+  if (size < 1024 * 1024) return (size / 1024).toFixed(2) + ' KB'
+  return (size / (1024 * 1024)).toFixed(2) + ' MB'
+}
+
+/**
+ * 复制文本到剪贴板
+ * @param text
+ */
+export async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text)
+    message.success('复制成功! ID: ' + text).then((r) => {})
+  } catch (err) {
+    message.error('复制失败!').then((r) => {})
+  }
 }

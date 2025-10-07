@@ -5,7 +5,7 @@
         <router-link to="/">
           <div class="title-bar">
 <!--            <img class="logo" src="../assets/logo.png" alt="logo"/>-->
-            <div class="title">熊Bee云图库</div>
+            <div class="title">啵哩啵哩</div>
           </div>
         </router-link>
       </a-col>
@@ -55,6 +55,7 @@ import {MenuProps, message} from 'ant-design-vue';
 import {useRouter} from "vue-router";
 import {useLoginUserStore} from "@/stores/useLoginUserStore";
 import {userLogoutUsingPost} from "@/api/userController";
+import PictureReleaseListPage from '@/pages/PictureReleaseListPage.vue'
 
 const loginUserStore = useLoginUserStore()
 // 未经过滤的菜单项
@@ -65,10 +66,15 @@ const originItems = [
     label: '主页',
     title: '主页',
   },
+  // {
+  //   key:'/add_picture',
+  //   label: '创建图片',
+  //   title: '创建图片'
+  // },
   {
-    key:'/add_picture',
-    label: '创建图片',
-    title: '创建图片'
+    key: '/picture/list',
+    label: '发布列表',
+    title: '发布列表'
   },
   {
     key: '/admin/userManage',
@@ -89,6 +95,11 @@ const originItems = [
     key: '/admin/spaceManage',
     label: '空间管理',
     title: '空间管理',
+  },
+  {
+    key:'/admin/scheduledTask',
+    label:'定时任务',
+    title: '定时任务'
   },
   {
     key: 'others',
@@ -131,7 +142,7 @@ const doLogout = async ()=>{
   const res = await userLogoutUsingPost()
   if(res.data.code === 0){
     loginUserStore.setLoginUser({username:'未登录'})
-    message.success('退出登录成功')
+    message.success('已退出登录')
     await router.push({
       path:'/user/login'
     })

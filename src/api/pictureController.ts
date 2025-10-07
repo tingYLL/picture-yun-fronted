@@ -17,6 +17,21 @@ export async function deletePictureUsingPost(
   })
 }
 
+/** pictureDownload POST /api/picture/download */
+export async function pictureDownloadUsingPost(
+  body: API.PictureInteractionRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseString_>('/api/picture/download', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}
+
 /** editPicture POST /api/picture/edit */
 export async function editPictureUsingPost(
   body: API.PictureEditRequest,
@@ -73,6 +88,21 @@ export async function getPictureVoByIdUsingGet(
     params: {
       ...params,
     },
+    ...(options || {}),
+  })
+}
+
+/** pictureLikeOrCollect POST /api/picture/interaction */
+export async function pictureLikeOrCollectUsingPost(
+  body: API.PictureInteractionRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseBoolean_>('/api/picture/interaction', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
     ...(options || {}),
   })
 }
@@ -158,6 +188,21 @@ export async function getPictureOutPaintingTaskUsingGet(
   )
 }
 
+/** getPicturePageListAsPersonRelease POST /api/picture/personRelease/page */
+export async function getPicturePageListAsPersonReleaseUsingPost(
+  body: API.PictureQueryRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponsePagePictureVO_>('/api/picture/personRelease/page', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}
+
 /** doPictureReview POST /api/picture/review */
 export async function doPictureReviewUsingPost(
   body: API.PictureReviewRequest,
@@ -194,6 +239,21 @@ export async function searchPictureByPictureUsingPost(
   options?: { [key: string]: any }
 ) {
   return request<API.BaseResponseListImageSearchResult_>('/api/picture/search/picture', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}
+
+/** pictureShare POST /api/picture/share */
+export async function pictureShareUsingPost(
+  body: API.PictureInteractionRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseBoolean_>('/api/picture/share', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
