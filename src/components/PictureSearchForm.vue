@@ -4,26 +4,12 @@
     <!-- 搜索表单 -->
     <a-form layout="inline" :model="searchParams" @finish="doSearch"  name="searchForm">
       <a-form-item label="关键词">
-        <a-input v-model:value="searchParams.searchText" placeholder="从名称和简介搜索" allow-clear />
+        <a-input v-model:value="searchParams.searchText" placeholder="从名称、简介、标签中搜索" allow-clear />
       </a-form-item>
-      <a-form-item label="分类">
-        <a-auto-complete
-          v-model:value="searchParams.category"
-          style="min-width: 180px"
-          placeholder="请输入分类"
-          :options="categoryOptions"
-          allow-clear
-        />
-      </a-form-item>
-      <a-form-item label="标签">
-        <a-select
-          v-model:value="searchParams.tags"
-          style="min-width: 180px"
-          mode="tags"
-          placeholder="请输入标签"
-          :options="tagOptions"
-          allow-clear
-        />
+      <a-form-item label="分类" name="categoryId">
+        <a-select v-model:value="searchParams.categoryId" placeholder="请选择分类"
+                  allow-clear :options="categoryOptions" style="min-width: 180px"
+                  size="middle"/>
       </a-form-item>
       <a-form-item label="日期" name="dataRange">
         <a-range-picker
@@ -36,25 +22,28 @@
           @change="onRangeChange"
         />
       </a-form-item>
-      <a-form-item label="名称" name="name">
-        <a-input v-model:value="searchParams.name" placeholder="请输入名称" allow-clear />
-      </a-form-item>
-      <a-form-item label="简介" name="introduction">
-        <a-input v-model:value="searchParams.introduction" placeholder="请输入简介" allow-clear />
-      </a-form-item>
-      <a-form-item label="宽度" name="picWidth" >
-        <a-input-number v-model:value="searchParams.picWidth" :min="1"/>
-      </a-form-item>
-      <a-form-item label="高度" name="picHeight" >
-        <a-input-number v-model:value="searchParams.picHeight" :min="1" />
-      </a-form-item>
       <a-form-item label="格式" name="picFormat">
-        <a-input v-model:value="searchParams.picFormat" placeholder="请输入格式" allow-clear />
+        <a-select
+          v-model:value="searchParams.picFormat"
+          :options="PIC_FORMAT_STATUS_OPTIONS"
+          placeholder="请选择图片格式"
+          style="min-width: 180px"
+          allow-clear
+          size="middle"
+        />
       </a-form-item>
       <a-form-item>
         <a-space>
           <a-button type="primary" html-type="submit" style="width: 96px">搜索</a-button>
-          <a-button html-type="reset" @click="doClear">重置</a-button>
+<!--          <a-button html-type="reset" @click="doClear">重置</a-button>-->
+          <a-button
+            @click="doClear"
+            style="color: #1890ff; border-color: #1890ff"
+            :icon="h(SyncOutlined)"
+            size="middle"
+          >
+            刷新
+          </a-button>
         </a-space>
       </a-form-item>
     </a-form>
@@ -62,15 +51,17 @@
   </div>
 </template>
 <script lang="ts" setup>
-import {onMounted, reactive, ref} from 'vue'
+import { h, onMounted, reactive, ref } from 'vue'
 import dayjs from 'dayjs'
 
 import {
-  PIC_REVIEW_STATUS_OPTIONS,
+  PIC_FORMAT_STATUS_OPTIONS,
+  PIC_REVIEW_STATUS_OPTIONS
 } from '../constants/picture.ts'
 
 import {getCategoryListAsHomeUsingGet} from "@/api/categoryController.ts"
 import {message} from "ant-design-vue";
+import { SyncOutlined } from '@ant-design/icons-vue'
 const categoryOptions = ref<API.CategoryVO[]>([])
 const tagOptions = ref<string[]>([])
 interface Props {
@@ -114,10 +105,10 @@ const rangePresets = ref([
 const getCategoryOptions  = async () =>{
   const res=  await getCategoryListAsHomeUsingGet()
   if(res.data.code === 0 && res.data.data){
-    categoryOptions.value = (res.data.data?? []).map((data:string)=>{
+    categoryOptions.value = (res.data.data ?? []).map((data: API.CategoryVO) => {
       return {
-        value:data,
-        label:data
+        value: data.id,
+        label: data.name,
       }
     })
   }else{

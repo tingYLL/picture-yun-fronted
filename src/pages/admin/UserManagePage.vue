@@ -26,7 +26,7 @@
           v-model:value="searchParams.userEmail"
           placeholder="请输入邮箱"
           allow-clear
-          size="large"
+          size="middle"
         />
       </a-form-item>
       <a-form-item label="手机号">
@@ -34,17 +34,17 @@
           v-model:value="searchParams.userPhone"
           placeholder="请输入手机号"
           allow-clear
-          size="large"
+          size="middle"
         />
       </a-form-item>
       <a-form-item>
-        <a-space size="large">
+        <a-space size="middle">
           <a-button type="primary" html-type="submit" :icon="h(SearchOutlined)">搜索</a-button>
           <a-button
             @click="refreshResetData"
             style="color: #1890ff; border-color: #1890ff"
             :icon="h(SyncOutlined)"
-            size="large"
+            size="middle"
           >
             刷新数据
           </a-button>

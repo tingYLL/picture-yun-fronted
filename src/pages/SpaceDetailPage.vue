@@ -39,11 +39,11 @@
     <PictureSearchForm :onSearch="onSearch"/>
     <div style="margin-bottom: 16px"></div>
     <!--    按颜色搜索，跟其他搜索条件独立-->
-    <a-form-item label="按颜色搜索">
-      <a-space>
-        <color-picker format="hex" @pureColorChange="onColorChange"/>
-      </a-space>
-    </a-form-item>
+<!--    <a-form-item label="按颜色搜索">-->
+<!--      <a-space>-->
+<!--        <color-picker format="hex" @pureColorChange="onColorChange"/>-->
+<!--      </a-space>-->
+<!--    </a-form-item>-->
     <!--    图片列表-->
     <PictureList :dataList="dataList" :loading="loading" :showOp="true" :onReload="fetchData"
                  :canEdit="canEditPicture" :canDelete="canDeletePicture"/>

@@ -25,11 +25,31 @@
                     style="min-width: 180px"
                     size="middle"/>
         </a-form-item>
+        <a-form-item label="图片格式" name="picFormat">
+          <a-select
+            v-model:value="searchParams.picFormat"
+            :options="PIC_FORMAT_STATUS_OPTIONS"
+            placeholder="请选择图片格式"
+            style="min-width: 180px"
+            allow-clear
+            size="middle"
+          />
+        </a-form-item>
         <a-form-item name="reviewStatus" label="审核状态">
           <a-select v-model:value="searchParams.reviewStatus"  placeholder="请选择审核状态" allow-clear :options="PIC_REVIEW_STATUS_OPTIONS" style="min-width: 180px"/>
         </a-form-item>
         <a-form-item>
-          <a-button type="primary" html-type="submit">搜索</a-button>
+          <a-space size="middle">
+            <a-button type="primary" html-type="submit" :icon="h(SearchOutlined)" size="middle">搜索</a-button>
+            <a-button
+              @click="refreshResetData"
+              style="color: #1890ff; border-color: #1890ff"
+              :icon="h(SyncOutlined)"
+              size="middle"
+            >
+              刷新
+            </a-button>
+          </a-space>
         </a-form-item>
       </a-form>
     </div>
@@ -146,17 +166,18 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, h, onMounted, reactive, ref } from 'vue'
 import {
   deletePictureUsingPost, doPictureReviewUsingPost,
   listPictureByPageUsingPost,
 } from '@/api/PictureController.ts'
-import { message } from 'ant-design-vue'
+import { message,Modal} from 'ant-design-vue'
 import dayjs from 'dayjs'
 import {
+  PIC_FORMAT_STATUS_OPTIONS,
   PIC_REVIEW_STATUS_ENUM,
   PIC_REVIEW_STATUS_MAP,
-  PIC_REVIEW_STATUS_OPTIONS,
+  PIC_REVIEW_STATUS_OPTIONS
 } from '../../constants/picture.ts'
 import { copyToClipboard, formatPictureSize, toHexColor } from '@/utils'
 import { PictureOutlined, SearchOutlined, SyncOutlined } from '@ant-design/icons-vue'
@@ -434,14 +455,22 @@ const doDelete = async (id: string) => {
   if (!id) {
     return
   }
-  const res = await deletePictureUsingPost({ id })
-  if (res.data.code === 0) {
-    message.success('删除成功')
-    // 刷新数据
-    fetchData()
-  } else {
-    message.error('删除失败')
-  }
+  Modal.confirm({
+    title:'删除图片',
+    content: '确定要删除该图片吗？删除后不可恢复！',
+    okText: '确定',
+    cancelText: '取消',
+    onOk: async () => {
+      const res = await deletePictureUsingPost({ id })
+      if (res.data.code === 0) {
+        message.success('删除成功')
+        // 刷新数据
+        fetchData()
+      } else {
+        message.error('删除失败')
+      }
+    }
+  })
 }
 
 // 审核图片
@@ -474,6 +503,15 @@ const rowSelection = reactive({
   columnWidth: 50,
   fixed: true,
 })
+
+/**
+ * 刷新重置数据
+ */
+const refreshResetData = () => {
+  resetPictureSearchParams()
+  fetchData()
+  message.success('刷新成功')
+}
 </script>
 
 <style scoped>

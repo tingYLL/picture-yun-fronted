@@ -28,7 +28,8 @@ export const PIC_STATUS_TAG_COLOR = {
 }
 
 export const PIC_FORMAT_STATUS_MAP = {
-  jpeg: 'JPG/JPEG',
+  jpeg: 'JPEG',
+  jpg:'JPG',
   png: 'PNG',
   gif: 'GIF',
   webp: 'WEBP',
