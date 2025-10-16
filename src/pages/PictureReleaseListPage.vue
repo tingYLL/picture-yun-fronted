@@ -169,6 +169,7 @@
         v-model:current="pictureSearchParams.current"
         v-model:pageSize="pictureSearchParams.pageSize"
         :total="total"
+        v-if="total > 0"
         :show-total="() => `共 ${total} 条`"
         @change="handlePageChange"
       />

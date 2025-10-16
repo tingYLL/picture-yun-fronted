@@ -1,7 +1,7 @@
 <template>
   <div id="userLoginPage">
     <h2 class="title">啵哩啵哩 - 用户登录</h2>
-    <div class="desc">企业级智能协同云图库</div>
+    <div class="desc">免费在线图片设计素材网站</div>
     <a-form
       :model="formState"
       name="basic"

@@ -18,6 +18,10 @@ import UserProfilePage from '@/pages/user/UserProfilePage.vue'
 import CategoryManagePage from '@/pages/admin/CategoryManagePage.vue'
 import ScheduledTaskManagePage from '@/pages/admin/ScheduledTaskManagePage.vue'
 import PictureReleaseListPage from '@/pages/PictureReleaseListPage.vue'
+import VIPCodeManagePage from '@/pages/admin/VIPCodeManagePage.vue'
+import MyDownloadsPage from '@/pages/MyDownloadsPage.vue'
+import MyCollectionsPage from '@/pages/MyCollectionsPage.vue'
+import SpaceListPage from '@/pages/SpaceListPage.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -62,6 +66,11 @@ const router = createRouter({
       component: ScheduledTaskManagePage,
     },
     {
+      path: '/admin/vipCodeManage',
+      name: 'VIP兑换码管理',
+      component: VIPCodeManagePage,
+    },
+    {
       path:'/spaceUserManage/:id',
       name:'空间成员管理',
       component:SpaceUserManagePage,
@@ -91,6 +100,21 @@ const router = createRouter({
       path:'/my_space',
       name:'我的空间',
       component:MySpacePage
+    },
+    {
+      path:'/my_downloads',
+      name:'下载记录',
+      component:MyDownloadsPage
+    },
+    {
+      path:'/my_collections',
+      name:'我的收藏',
+      component:MyCollectionsPage
+    },
+    {
+      path:'/space_list',
+      name:'空间列表',
+      component:SpaceListPage
     },
     {
       path: '/user/profile',

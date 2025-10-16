@@ -1,42 +1,78 @@
 <template>
   <div id="globalHeader">
-    <a-row :wrap="false">
-      <a-col flex="200px">
-        <router-link to="/">
-          <div class="title-bar">
-<!--            <img class="logo" src="../assets/logo.png" alt="logo"/>-->
-            <div class="title">啵哩啵哩</div>
-          </div>
-        </router-link>
-      </a-col>
+    <a-row :wrap="false" align="middle">
       <a-col flex="auto">
-        <a-menu v-model:selectedKeys="current" mode="horizontal" :items="items" @click="doMenuClick"/>
+        <div style="display: flex; align-items: center;">
+          <a-button
+            type="text"
+            class="sider-trigger"
+            @click="$emit('toggle-sider')"
+          >
+            <MenuFoldOutlined v-if="!collapsed" />
+            <MenuUnfoldOutlined v-else />
+          </a-button>
+          <router-link to="/">
+            <div class="title-bar">
+              <div class="title">啵哩啵哩</div>
+            </div>
+          </router-link>
+          <a-menu
+            v-model:selectedKeys="current"
+            mode="horizontal"
+            :items="items"
+            @click="doMenuClick"
+            style="flex: 1; border: none;"
+          />
+        </div>
       </a-col>
       <a-col flex="120px">
         <div class="user-login-status">
           <div v-if="loginUserStore.loginUser.id">
-            <a-dropdown>
+            <a-dropdown @visibleChange="handleDropdownVisibleChange">
               <a-space>
                 <a-avatar :src="loginUserStore.loginUser.userAvatar" />
                 {{loginUserStore.loginUser.userName??'无名'}}
               </a-space>
               <template #overlay>
-                <a-menu>
-                  <a-menu-item >
-                    <router-link to="/user/profile"/>
-                    <UserOutlined />
-                    个人信息
-                  </a-menu-item>
-                  <a-menu-item >
-                    <router-link to="/my_space"/>
-                    <UserOutlined />
-                    我的空间
-                  </a-menu-item>
-                  <a-menu-item @click="doLogout">
+                <div class="user-dropdown-menu">
+                  <div class="menu-header">
+                    <div class="download-info">
+                      <div class="download-text">
+                        <CloudDownloadOutlined />
+                        <span>今日免费下载次数</span>
+                      </div>
+                      <div class="download-count-wrapper">
+                        <span class="download-count">{{ remainingDownloads }}</span>
+                        <span class="download-unit">次</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <a-divider class="menu-divider" />
+
+                  <div class="menu-item vip-item" @click="openPaymentModal">
+                    <CrownOutlined class="vip-crown" />
+                    <StarOutlined class="vip-star" />
+                    <span class="vip-text">VIP充值</span>
+                    <RightOutlined class="menu-arrow" />
+                  </div>
+
+                  <div class="menu-item">
+                    <router-link to="/user/profile" class="menu-link">
+                      <UserOutlined />
+                      <span>个人信息</span>
+                      <RightOutlined class="menu-arrow" />
+                    </router-link>
+                  </div>
+
+                  <a-divider class="menu-divider" />
+
+                  <div class="menu-item logout-item" @click="doLogout">
                     <LogoutOutlined />
-                    退出登录
-                  </a-menu-item>
-                </a-menu>
+                    <span>退出登录</span>
+                    <RightOutlined class="menu-arrow" />
+                  </div>
+                </div>
               </template>
           </a-dropdown>
           </div>
@@ -46,25 +82,77 @@
         </div>
       </a-col>
     </a-row>
+
+    <!-- PaymentModal组件 -->
+    <PaymentModal ref="paymentModalRef" />
   </div>
 </template>
 <script lang="ts" setup>
-import {computed, h, ref} from 'vue';
-import {HomeOutlined,LogoutOutlined,UserOutlined} from '@ant-design/icons-vue';
+import {computed, h, ref, onMounted} from 'vue';
+import {HomeOutlined,LogoutOutlined,UserOutlined,CrownOutlined,StarOutlined,CloudDownloadOutlined,RightOutlined,MenuFoldOutlined,MenuUnfoldOutlined} from '@ant-design/icons-vue';
 import {MenuProps, message} from 'ant-design-vue';
 import {useRouter} from "vue-router";
 import {useLoginUserStore} from "@/stores/useLoginUserStore";
 import {userLogoutUsingPost} from "@/api/userController";
+import {getRemainingDownloadsUsingGet} from "@/api/downloadController";
 import PictureReleaseListPage from '@/pages/PictureReleaseListPage.vue'
+import PaymentModal from './PaymentModal.vue'
+
+// 接收 props 和定义 emits
+defineProps<{
+  collapsed: boolean;
+}>();
+
+defineEmits<{
+  (e: 'toggle-sider'): void;
+}>();
 
 const loginUserStore = useLoginUserStore()
+
+// 剩余下载次数
+const remainingDownloads = ref<number>(0)
+
+// 获取剩余下载次数
+const fetchRemainingDownloads = async () => {
+  try {
+    const res = await getRemainingDownloadsUsingGet()
+    if (res.data.code === 0) {
+      remainingDownloads.value = res.data.data
+    }
+  } catch (error) {
+    console.error('获取剩余下载次数失败:', error)
+  }
+}
+
+// PaymentModal ref
+const paymentModalRef = ref<InstanceType<typeof PaymentModal>>()
+
+// 打开支付弹窗
+const openPaymentModal = () => {
+  paymentModalRef.value?.openModal()
+}
+
+// 处理下拉菜单显示/隐藏事件
+const handleDropdownVisibleChange = (visible: boolean) => {
+  if (visible && loginUserStore.loginUser.id) {
+    // 当下拉菜单打开时，获取最新的剩余下载次数
+    fetchRemainingDownloads()
+  }
+}
+
+// 组件挂载时获取剩余下载次数
+onMounted(() => {
+  if (loginUserStore.loginUser.id) {
+    fetchRemainingDownloads()
+  }
+})
 // 未经过滤的菜单项
 const originItems = [
   {
     key: '/',
     icon: () => h(HomeOutlined),
-    label: '主页',
-    title: '主页',
+    label: '首页',
+    title: '首页',
   },
   // {
   //   key:'/add_picture',
@@ -102,9 +190,9 @@ const originItems = [
     title: '定时任务'
   },
   {
-    key: 'others',
-    label: h('a', { href: 'https://www.bilibili.com/', target: '_blank' }, '哔哩哔哩'),
-    title: '哔哩哔哩干杯',
+    key:'/admin/vipCodeManage',
+    label:'兑换码管理',
+    title: '兑换码管理'
   },
 ]
 
@@ -157,16 +245,184 @@ const doLogout = async ()=>{
 #globalHeader .title-bar {
   display: flex;
   align-items: center;
+  margin-right: 24px;
+}
+
+.sider-trigger {
+  font-size: 18px;
+  padding: 0 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.sider-trigger:hover {
+  background: rgba(0, 0, 0, 0.06);
 }
 
 .title {
   color: black;
   font-size: 18px;
-  margin-left: 16px;
+  margin-left: 8px;
 }
 
 .logo {
   height: 48px;
+}
+
+/* 下拉菜单整体样式 */
+.user-dropdown-menu {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  min-width: 280px;
+  overflow: hidden;
+}
+
+/* 菜单头部样式 */
+.menu-header {
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #fb7299 0%, #fc9dce 100%);
+  color: white;
+}
+
+.download-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.download-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.download-count-wrapper {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.download-count {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.download-unit {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* 分割线样式 */
+.menu-divider {
+  margin: 0;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+/* 菜单项通用样式 */
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  gap: 12px;
+}
+
+.menu-item:hover {
+  background: linear-gradient(90deg, rgba(251, 114, 153, 0.08) 0%, rgba(252, 157, 206, 0.08) 100%);
+}
+
+.menu-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+  text-decoration: none;
+  width: 100%;
+}
+
+.menu-link:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* VIP充值特殊样式 */
+.vip-item {
+  background: linear-gradient(135deg, #e8f4fd 0%, #d6ecff 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.vip-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(251, 114, 153, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.vip-item:hover::before {
+  left: 100%;
+}
+
+.vip-crown {
+  color: #fb7299;
+  font-size: 18px;
+}
+
+.vip-star {
+  color: #00a1d6;
+  font-size: 16px;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.vip-text {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 15px;
+}
+
+@keyframes sparkle {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.1) rotate(180deg); }
+}
+
+/* 退出登录样式 */
+.logout-item {
+  color: #e74c3c;
+}
+
+.logout-item:hover {
+  background: rgba(231, 76, 60, 0.1);
+}
+
+/* 通用箭头样式 */
+.menu-arrow {
+  margin-left: auto;
+  color: #bdc3c7;
+  font-size: 12px;
+  transition: transform 0.3s ease;
+}
+
+.menu-item:hover .menu-arrow {
+  transform: translateX(4px);
+}
+
+/* 图标通用样式 */
+.menu-item .anticon {
+  font-size: 16px;
 }
 </style>
 

@@ -1,9 +1,11 @@
 <template>
   <div id="basicLayout">
     <a-layout style="min-height: 100vh">
-      <a-layout-header class="header"><GlobalHeader /></a-layout-header>
+      <a-layout-header class="header">
+        <GlobalHeader :collapsed="collapsed" @toggle-sider="toggleSider" />
+      </a-layout-header>
       <a-layout>
-        <GlobalSider class="sider"/>
+        <GlobalSider class="sider" :collapsed="collapsed"/>
         <a-layout-content class="content">
           <router-view />
         </a-layout-content>
@@ -18,6 +20,15 @@
 
 import GlobalHeader from "@/components/GlobalHeader.vue";
 import GlobalSider from "@/components/GlobalSider.vue";
+import { ref } from 'vue';
+
+// 侧边栏收缩状态
+const collapsed = ref(false);
+
+// 切换侧边栏
+const toggleSider = () => {
+  collapsed.value = !collapsed.value;
+};
 </script>
 
 <style scoped>
@@ -43,7 +54,7 @@ import GlobalSider from "@/components/GlobalSider.vue";
 #basicLayout .content {
   padding: 28px;
   background: linear-gradient(to right, #fefefe, #fff);
-  margin-bottom: 28px;
+  /* margin-bottom: 28px; */
 }
 
 #basicLayout .footer {

@@ -117,15 +117,18 @@
       </a-col>
     </a-row>
     <ShareModal ref="shareModalRef" :link="shareLink" />
+    <PaymentModal ref="paymentModalRef" />
   </div>
 </template>
 <script setup lang="ts">
 import {computed, defineProps, h, onMounted, reactive, ref} from "vue";
 import {deletePictureUsingPost, getPictureVoByIdUsingGet,
   pictureLikeOrCollectUsingPost,pictureShareUsingPost,
-  pictureDownloadUsingPost} from "@/api/pictureController";
+  } from "@/api/pictureController";
+import {downloadFileUsingPost} from "@/api/downloadController.ts"
+import PaymentModal from '@/components/PaymentModal.vue'
 import {useRoute, useRouter} from "vue-router";
-import {message} from "ant-design-vue";
+import { message, Modal } from 'ant-design-vue'
 import {downloadImage, formatSize,toHexColor} from '@/utils/index'
 import ShareModal from '@/components/ShareModal.vue'
 import {formatNumber} from '@/utils/index'
@@ -219,13 +222,27 @@ const doDelete = async ()=>{
   if(!id){
     return
   }
-  const res = await deletePictureUsingPost({ id })
-  if (res.data.code === 0) {
-    message.success('删除成功')
-  } else {
-    message.error('删除失败')
-  }
+  Modal.confirm({
+    title:'删除图片',
+    content: '确定要删除该图片吗？删除后不可恢复！',
+    okText: '确定',
+    cancelText: '取消',
+    onOk: async () => {
+      const res = await deletePictureUsingPost({ id })
+      if (res.data.code === 0) {
+        message.success('删除成功')
+        router.push('/')
+      } else {
+        message.error('删除失败')
+      }
+    }
+  })
+
 }
+
+
+
+const paymentModalRef = ref()
 /**
  * 下载状态
  */
@@ -235,20 +252,37 @@ const doDownload = async () => {
     message.warn('重复下载！')
     return
   }
-  const res = await pictureDownloadUsingPost({pictureId: picture.value.id})
-  if (res.data.code === 0 && res.data.data) {
-    await downloadImage(picture.value.url)
-    message.success('下载成功！')
-    fetchPictureDetail()
-    isDownload.value = false
-    setTimeout(() => {
-      isDownload.value = true
-    }, 3000)
-  } else {
-    message.error(res.data.message)
+  try {
+    const res = await downloadFileUsingPost({fileId: picture.value.id})
+    if (res.data.code === 0 && res.data.data) {
+      await downloadImage(picture.value.url)
+      message.success('下载成功！')
+      fetchPictureDetail()
+      isDownload.value = false
+      setTimeout(() => {
+        isDownload.value = true
+      }, 3000)
+    } else {
+      message.error(res.data.message)
+      // 下载失败时弹出支付框
+      paymentModalRef.value.openModal()
+    }
+  }catch (e:any){
+    message.error('下载失败：' + e.message)
+    // 下载失败时弹出支付框
+    paymentModalRef.value.visible = true
   }
 
+
 }
+
+
+
+
+
+
+
+
 
 onMounted(()=>{
   fetchPictureDetail()
@@ -366,7 +400,7 @@ const doSharePicture = async (picture: API.PictureVO, e: Event) => {
   const pictureId = picture.id
   const res = await pictureShareUsingPost({ pictureId })
   if (res.data.code === 0 && res.data.data) {
-    shareLink.value = `${window.location.protocol}//${window.location.host}/picture/detail/${pictureId}`
+    shareLink.value = `${window.location.protocol}//${window.location.host}/picture/${pictureId}`
     if (shareModalRef.value) {
       shareModalRef.value.openModal()
     }

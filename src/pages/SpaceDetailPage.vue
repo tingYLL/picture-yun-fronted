@@ -3,7 +3,7 @@
     <a-flex justify="space-between">
       <h2>{{ space.spaceName }} ({{SPACE_TYPE_MAP[space.spaceType]}})</h2>
       <a-space size="middle">
-        <a-button type="primary" :href="`/add_picture?spaceId=${id}`" target="_blank" v-if="canUploadPicture">+ 创建图片</a-button>
+        <a-button type="primary" :href="`/add_picture?spaceId=${id}`" target="_blank" v-if="canUploadPicture"><CloudUploadOutlined/>上传图片</a-button>
         <a-button
           type="primary"
           ghost
@@ -25,16 +25,56 @@
           空间分析
         </a-button>
         <a-button :icon="h(EditOutlined)" @click="doBatchEdit" v-if="canEditPicture">批量编辑</a-button>
-        <a-tooltip :title="`占用空间${formatSize(space.totalSize)} / ${formatSize(space.maxSize)}`">
-          <a-progress
-            type="circle"
-            :size="42"
-            :percent="((space.totalSize * 100) / space.maxSize).toFixed(1)"
-          />
-        </a-tooltip>
+<!--        <a-tooltip :title="`占用空间${formatSize(space.totalSize)} / ${formatSize(space.maxSize)}`">-->
+<!--          <a-progress-->
+<!--            type="circle"-->
+<!--            :size="42"-->
+<!--            :percent="((space.totalSize * 100) / space.maxSize).toFixed(1)"-->
+<!--          />-->
+<!--        </a-tooltip>-->
       </a-space>
     </a-flex>
-    <div style="margin-bottom: 16px"></div>
+    <!-- 空间使用区域 -->
+    <div class="usage-section">
+      <a-collapse v-model:activeKey="useActiveKey" collapsible="header" :bordered="false">
+        <a-collapse-panel key="1" class="usage-panel">
+          <template #header>
+            <div class="panel-header">
+              <a-typography-title :level="5" class="usage-title">
+                <FolderOpenOutlined class="usage-icon" />
+                空间使用情况
+              </a-typography-title>
+              <CaretDownOutlined class="collapse-icon" />
+            </div>
+          </template>
+          <div class="usage-content">
+            <div class="usage-item">
+              <span class="usage-label">存储空间:</span>
+              <span class="usage-value">{{formatSize(space.totalSize) }} / {{formatSize(space.maxSize)}}</span>
+              <a-progress
+                :percent="((space.totalSize / space.maxSize) * 100).toFixed(1)"
+                :stroke-color="getProgressColor(space.totalSize / space.maxSize)"
+                status="active"
+                :show-info="false"
+                class="usage-progress"
+              />
+            </div>
+            <div class="usage-item">
+              <span class="usage-label">图片数量:</span>
+              <span class="usage-value">{{ space.totalCount }} / {{ space.maxCount }} 张</span>
+              <a-progress
+                :percent="((space.totalCount / space.maxCount) * 100).toFixed(1)"
+                :stroke-color="getProgressColor(space.totalCount / space.maxCount)"
+                status="active"
+                :show-info="false"
+                class="usage-progress"
+              />
+            </div>
+          </div>
+        </a-collapse-panel>
+      </a-collapse>
+    </div>
+    <a-divider style="margin: 12px 0" />
     <!--    搜索表单-->
     <PictureSearchForm :onSearch="onSearch"/>
     <div style="margin-bottom: 16px"></div>
@@ -45,16 +85,22 @@
 <!--      </a-space>-->
 <!--    </a-form-item>-->
     <!--    图片列表-->
-    <PictureList :dataList="dataList" :loading="loading" :showOp="true" :onReload="fetchData"
-                 :canEdit="canEditPicture" :canDelete="canDeletePicture"/>
-    <!--    分页-->
-    <a-pagination
-      v-model:current="searchParams.current"
-      v-model:pageSize="searchParams.pageSize"
-      :total="total"
-      @change="onPageChange"
-      style="text-align: right"
-    />
+    <div v-if="!loading && dataList.length === 0">
+      <a-empty description="您还没有上传任何图片" />
+    </div>
+    <template v-else>
+      <PictureList :dataList="dataList" :loading="loading" :showOp="true" :onReload="fetchData"
+                   :canEdit="canEditPicture" :canDelete="canDeletePicture"/>
+      <!--    分页-->
+      <a-pagination
+        v-if="total > 0"
+        v-model:current="searchParams.current"
+        v-model:pageSize="searchParams.pageSize"
+        :total="total"
+        @change="onPageChange"
+        style="text-align: right; margin-top: 16px"
+      />
+    </template>
     <BatchEditPictureModal ref="batchEditPictureModalRef" :spaceId="id" :pictureList="dataList"
                            :onSuccess="onBatchEditPictureSuccess"/>
   </div>
@@ -65,6 +111,13 @@ import {deleteSpaceUsingPost, getSpaceVoByIdUsingGet} from "@/api/spaceControlle
 import {useRoute, useRouter} from "vue-router";
 import {message} from "ant-design-vue";
 import {downloadImage, formatSize} from '@/utils/index'
+import {
+  BlockOutlined,
+  CloudUploadOutlined,
+  SearchOutlined,
+  ShareAltOutlined,
+  SyncOutlined, CaretDownOutlined, FolderOpenOutlined, KeyOutlined
+} from '@ant-design/icons-vue'
 import {
   DeleteOutlined,
   EditOutlined,
@@ -85,7 +138,10 @@ import {SPACE_TYPE_ENUM} from "@/constants/space";
 interface Props {
   id: string | number
 }
-
+/**
+ * 空间使用情况选中的 KEY
+ */
+const useActiveKey = ref([])
 const props = defineProps<Props>()
 const router = useRouter()
 const space = ref<API.SpaceVO>({})
@@ -210,11 +266,87 @@ watch(
     fetchData()
   }
 )
+
+// 辅助函数：获取进度条颜色
+const getProgressColor = (ratio: number) => {
+  if (ratio < 0.5) return '#06D6A0'
+  if (ratio < 0.8) return '#FFD166'
+  return '#D90429'
+}
 </script>
 
 <style scoped>
 #spaceDetailPage {
   margin-bottom: 16px;
+}
+.usage-section {
+  margin-top: 10px;
+  margin-bottom: 0;
+
+  .usage-panel {
+    background: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #f0f0f0;
+
+    :deep(.ant-collapse-header) {
+      padding: 12px 16px !important;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+
+      .usage-title {
+        margin: 0;
+        display: flex;
+        align-items: center;
+
+        .usage-icon {
+          margin-right: 8px;
+          color: #ff9a2e;
+        }
+      }
+
+      .collapse-icon {
+        transition: transform 0.3s;
+      }
+    }
+
+    :deep(.ant-collapse-content-box) {
+      padding: 16px !important;
+    }
+  }
+
+  .usage-content {
+    .usage-item {
+      margin-bottom: 16px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .usage-label {
+        font-weight: 500;
+        margin-right: 8px;
+        color: #555;
+      }
+
+      .usage-value {
+        color: #333;
+        font-weight: 500;
+      }
+
+      .usage-progress {
+        margin-top: 8px;
+
+        :deep(.ant-progress-bg) {
+          height: 10px !important;
+        }
+      }
+    }
+  }
 }
 
 </style>

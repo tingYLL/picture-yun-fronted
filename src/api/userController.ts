@@ -135,6 +135,21 @@ export async function editUserPasswordUsingPost(
   })
 }
 
+/** redeemCode POST /api/user/redeemCode */
+export async function redeemCodeUsingPost(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.redeemCodeUsingPOSTParams,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseString_>('/api/user/redeemCode', {
+    method: 'POST',
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  })
+}
+
 /** userRegister POST /api/user/register */
 export async function userRegisterUsingPost(
   body: API.UserRegisterRequest,

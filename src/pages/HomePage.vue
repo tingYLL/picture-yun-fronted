@@ -34,7 +34,7 @@
           <a-divider v-if="dataList.length > 0" style="color: #666666">
             🐮🐮🐮 这是我的底线~
           </a-divider>
-          <a-empty v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" />
+          <a-empty description="暂无数据" v-else :image="Empty.PRESENTED_IMAGE_SIMPLE" />
         </div>
       </div>
     </div>

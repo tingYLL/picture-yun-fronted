@@ -17,21 +17,6 @@ export async function deletePictureUsingPost(
   })
 }
 
-/** pictureDownload POST /api/picture/download */
-export async function pictureDownloadUsingPost(
-  body: API.PictureInteractionRequest,
-  options?: { [key: string]: any }
-) {
-  return request<API.BaseResponseString_>('/api/picture/download', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
-    ...(options || {}),
-  })
-}
-
 /** editPicture POST /api/picture/edit */
 export async function editPictureUsingPost(
   body: API.PictureEditRequest,
@@ -143,6 +128,21 @@ export async function listPictureVoByPageWithCacheUsingPost(
   options?: { [key: string]: any }
 ) {
   return request<API.BaseResponsePagePictureVO_>('/api/picture/list/page/vo/cache', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}
+
+/** getMyCollectPictureList POST /api/picture/my/collect/list */
+export async function getMyCollectPictureListUsingPost(
+  body: API.PictureQueryRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponsePagePictureVO_>('/api/picture/my/collect/list', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

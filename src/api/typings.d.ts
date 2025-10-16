@@ -83,6 +83,12 @@ declare namespace API {
     message?: string
   }
 
+  type BaseResponseListVIPRedemptionCode_ = {
+    code?: number
+    data?: VIPRedemptionCode[]
+    message?: string
+  }
+
   type BaseResponseLoginUserVO_ = {
     code?: number
     data?: LoginUserVO
@@ -95,9 +101,21 @@ declare namespace API {
     message?: string
   }
 
+  type BaseResponseMapStringObject_ = {
+    code?: number
+    data?: Record<string, any>
+    message?: string
+  }
+
   type BaseResponsePageCategoryVO_ = {
     code?: number
     data?: PageCategoryVO_
+    message?: string
+  }
+
+  type BaseResponsePageDownloadHistoryVO_ = {
+    code?: number
+    data?: PageDownloadHistoryVO_
     message?: string
   }
 
@@ -185,6 +203,12 @@ declare namespace API {
     message?: string
   }
 
+  type BaseResponseVIPRedemptionCode_ = {
+    code?: number
+    data?: VIPRedemptionCode
+    message?: string
+  }
+
   type Category = {
     createTime?: string
     editTime?: string
@@ -233,6 +257,11 @@ declare namespace API {
     userId?: number
   }
 
+  type checkVIPStatusUsingGETParams = {
+    /** userId */
+    userId: number
+  }
+
   type CreateOutPaintingTaskResponse = {
     code?: string
     message?: string
@@ -247,6 +276,49 @@ declare namespace API {
 
   type DeleteRequest = {
     id?: number
+  }
+
+  type deleteUsingDELETEParams = {
+    /** id */
+    id: number
+  }
+
+  type downloadFileUsingPOSTParams = {
+    /** fileId */
+    fileId?: number
+  }
+
+  type DownloadHistoryVO = {
+    downloadedAt?: string
+    id?: number
+    picture?: PictureVO
+  }
+
+  type DownloadRequest = {
+    current?: number
+    endTime?: string
+    id?: number
+    interactionStatus?: number
+    interactionType?: number
+    multipleSort?: boolean
+    pageSize?: number
+    sort?: Sort
+    sortField?: string
+    sortOrder?: string
+    sorts?: Sort[]
+    startTime?: string
+  }
+
+  type generateCodeUsingPOSTParams = {
+    /** count */
+    count?: number
+    /** type */
+    type?: string
+  }
+
+  type getByIdUsingGETParams = {
+    /** id */
+    id: number
   }
 
   type GetOutPaintingTaskResponse = {
@@ -327,6 +399,14 @@ declare namespace API {
     current?: number
     pages?: number
     records?: CategoryVO[]
+    size?: number
+    total?: number
+  }
+
+  type PageDownloadHistoryVO_ = {
+    current?: number
+    pages?: number
+    records?: DownloadHistoryVO[]
     size?: number
     total?: number
   }
@@ -545,6 +625,16 @@ declare namespace API {
     user?: UserVO
     userId?: number
     viewQuantity?: number
+  }
+
+  type RedeemCodeRequest = {
+    code?: string
+    userId?: number
+  }
+
+  type redeemCodeUsingPOSTParams = {
+    /** code */
+    code: string
   }
 
   type ScheduledTaskAddRequest = {
@@ -806,6 +896,7 @@ declare namespace API {
   }
 
   type User = {
+    balance?: number
     birthday?: string
     createTime?: string
     editTime?: string
@@ -902,5 +993,28 @@ declare namespace API {
     vipExpireTime?: string
     vipNnumber?: number
     vipSign?: string
+  }
+
+  type validateCodeUsingGETParams = {
+    /** code */
+    code: string
+  }
+
+  type VIPRedemptionCode = {
+    code?: string
+    createdAt?: string
+    id?: number
+    isUsed?: boolean
+    updatedAt?: string
+    usedAt?: string
+    userId?: number
+  }
+
+  type VIPRedemptionCodeDTO = {
+    code?: string
+    id?: number
+    isUsed?: boolean
+    usedAt?: string
+    userId?: number
   }
 }
