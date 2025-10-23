@@ -43,7 +43,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import {computed, onMounted, reactive, ref} from "vue";
+import {computed, onMounted, onActivated, reactive, ref} from "vue";
 import { listPictureVoByPageUsingPost} from "@/api/pictureController";
 import { getCategoryListAsHomeUsingGet } from '@/api/categoryController.ts'
 import { Empty, message } from 'ant-design-vue'

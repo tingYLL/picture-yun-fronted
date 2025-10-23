@@ -23,7 +23,7 @@ export async function checkVipStatusUsingGet(
   params: API.checkVIPStatusUsingGETParams,
   options?: { [key: string]: any }
 ) {
-  return request<API.BaseResponseBoolean_>('/api/vip/status', {
+  return request<API.BaseResponseVIPInfoVO_>('/api/vip/status', {
     method: 'GET',
     params: {
       ...params,

@@ -17,6 +17,21 @@ export async function deletePictureUsingPost(
   })
 }
 
+/** deletePictureByBatch POST /api/picture/delete/batch */
+export async function deletePictureByBatchUsingPost(
+  body: API.DeleteBatchRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseBoolean_>('/api/picture/delete/batch', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}
+
 /** editPicture POST /api/picture/edit */
 export async function editPictureUsingPost(
   body: API.PictureEditRequest,
@@ -328,6 +343,29 @@ export async function uploadPictureByBatchUsingPost(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}
+
+/** uploadMultiplePictures POST /api/picture/upload/multi */
+export async function uploadMultiplePicturesUsingPost(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.uploadMultiplePicturesUsingPOSTParams,
+  body: {
+    /** files */
+    files: any[]
+  },
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseListPictureVO_>('/api/picture/upload/multi', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    params: {
+      ...params,
     },
     data: body,
     ...(options || {}),

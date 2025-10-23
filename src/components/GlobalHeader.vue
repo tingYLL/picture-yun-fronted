@@ -25,13 +25,22 @@
           />
         </div>
       </a-col>
-      <a-col flex="120px">
+      <a-col flex="auto">
         <div class="user-login-status">
           <div v-if="loginUserStore.loginUser.id">
             <a-dropdown @visibleChange="handleDropdownVisibleChange">
-              <a-space>
-                <a-avatar :src="loginUserStore.loginUser.userAvatar" />
-                {{loginUserStore.loginUser.userName??'无名'}}
+              <a-space :size="8">
+                <a-badge :dot="loginUserStore.loginUser.isVip" :offset="[-8, 32]">
+                  <template #count>
+                    <div class="vip-badge-icon" :class="{ 'non-vip': !loginUserStore.loginUser.isVip }">
+                      <SketchOutlined />
+                    </div>
+                  </template>
+                  <a-avatar :src="loginUserStore.loginUser.userAvatar" :size="40" />
+                </a-badge>
+                <div class="user-info">
+                  <span class="user-name-text">{{loginUserStore.loginUser.userName??'无名'}}</span>
+                </div>
               </a-space>
               <template #overlay>
                 <div class="user-dropdown-menu">
@@ -89,7 +98,9 @@
 </template>
 <script lang="ts" setup>
 import {computed, h, ref, onMounted} from 'vue';
-import {HomeOutlined,LogoutOutlined,UserOutlined,CrownOutlined,StarOutlined,CloudDownloadOutlined,RightOutlined,MenuFoldOutlined,MenuUnfoldOutlined} from '@ant-design/icons-vue';
+import {HomeOutlined,LogoutOutlined,UserOutlined,CrownOutlined,StarOutlined,
+  CloudDownloadOutlined,RightOutlined,MenuFoldOutlined,
+  MenuUnfoldOutlined,SketchOutlined} from '@ant-design/icons-vue';
 import {MenuProps, message} from 'ant-design-vue';
 import {useRouter} from "vue-router";
 import {useLoginUserStore} from "@/stores/useLoginUserStore";
@@ -269,6 +280,14 @@ const doLogout = async ()=>{
   height: 48px;
 }
 
+/* 用户登录状态容器样式 */
+.user-login-status {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 24px;
+}
+
 /* 下拉菜单整体样式 */
 .user-dropdown-menu {
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
@@ -424,5 +443,49 @@ const doLogout = async ()=>{
 .menu-item .anticon {
   font-size: 16px;
 }
+
+/* VIP认证徽章 - 使用 a-badge 实现 */
+.vip-badge-icon {
+  width: 16px;
+  height: 16px;
+  background: linear-gradient(135deg, #fb7299 0%, #fc9dce 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(251, 114, 153, 0.5);
+  font-size: 10px;
+  color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+/* 非会员徽章样式 - 纯灰色 */
+.vip-badge-icon.non-vip {
+  background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
+  box-shadow: 0 2px 8px rgba(149, 165, 166, 0.3);
+}
+
+/* 移除 hover 效果，保持图标固定 */
+/* .vip-badge-icon:hover {
+  transform: scale(1.1);
+  box-shadow: 0 3px 12px rgba(251, 114, 153, 0.6);
+} */
+
+/* 用户名容器样式 */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
+.user-name-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
 </style>
 

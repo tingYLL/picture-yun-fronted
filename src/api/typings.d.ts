@@ -89,12 +89,6 @@ declare namespace API {
     message?: string
   }
 
-  type BaseResponseLoginUserVO_ = {
-    code?: number
-    data?: LoginUserVO
-    message?: string
-  }
-
   type BaseResponseLong_ = {
     code?: number
     data?: number
@@ -203,6 +197,12 @@ declare namespace API {
     message?: string
   }
 
+  type BaseResponseVIPInfoVO_ = {
+    code?: number
+    data?: VIPInfoVO
+    message?: string
+  }
+
   type BaseResponseVIPRedemptionCode_ = {
     code?: number
     data?: VIPRedemptionCode
@@ -272,6 +272,10 @@ declare namespace API {
   type CreatePictureOutPaintingTaskRequest = {
     parameters?: Parameters
     pictureId?: number
+  }
+
+  type DeleteBatchRequest = {
+    ids?: number[]
   }
 
   type DeleteRequest = {
@@ -364,18 +368,6 @@ declare namespace API {
   type ImageSearchResult = {
     fromUrl?: string
     thumbUrl?: string
-  }
-
-  type LoginUserVO = {
-    createTime?: string
-    editTime?: string
-    id?: number
-    updateTime?: string
-    userAccount?: string
-    userAvatar?: string
-    userName?: string
-    userProfile?: string
-    userRole?: string
   }
 
   type Output = {
@@ -502,7 +494,7 @@ declare namespace API {
   }
 
   type PictureEditByBatchRequest = {
-    category?: string
+    categoryId?: number
     nameRule?: string
     pictureIdList?: number[]
     spaceId?: number
@@ -888,6 +880,13 @@ declare namespace API {
     filepath?: string
   }
 
+  type uploadMultiplePicturesUsingPOSTParams = {
+    fileUrl?: string
+    id?: number
+    picName?: string
+    spaceId?: number
+  }
+
   type uploadPictureUsingPOSTParams = {
     fileUrl?: string
     id?: number
@@ -917,7 +916,6 @@ declare namespace API {
     vipCode?: string
     vipExpireTime?: string
     vipNnumber?: number
-    vipSign?: string
   }
 
   type UserAddRequest = {
@@ -981,6 +979,7 @@ declare namespace API {
     id?: number
     inviteUserId?: number
     isDisabled?: number
+    isVip?: boolean
     shareCode?: string
     userAccount?: string
     userAvatar?: string
@@ -992,12 +991,19 @@ declare namespace API {
     vipCode?: string
     vipExpireTime?: string
     vipNnumber?: number
-    vipSign?: string
   }
 
   type validateCodeUsingGETParams = {
     /** code */
     code: string
+  }
+
+  type VIPInfoVO = {
+    isExpired?: boolean
+    isVip?: boolean
+    remainingDays?: number
+    vipEndDate?: string
+    vipStartDate?: string
   }
 
   type VIPRedemptionCode = {

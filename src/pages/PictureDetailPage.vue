@@ -1,5 +1,15 @@
 <template>
   <div id="pictureDetailPage">
+    <!-- 返回按钮 -->
+    <div style="margin-bottom: 16px">
+      <a-button
+        type="text"
+        :icon="h(ArrowLeftOutlined)"
+        @click="goBack"
+      >
+        返回
+      </a-button>
+    </div>
     <a-row :gutter="[16,16]">
 <!--      图片预览-->
       <a-col :sm="24" :md="16" :xl="18">
@@ -136,7 +146,7 @@ import {
   DeleteOutlined,
   EditOutlined,
   DownloadOutlined,
-  ShareAltOutlined,EyeOutlined,LikeFilled,LikeOutlined,StarFilled,StarOutlined
+  ShareAltOutlined,EyeOutlined,LikeFilled,LikeOutlined,StarFilled,StarOutlined,ArrowLeftOutlined
 } from '@ant-design/icons-vue'
 import {useLoginUserStore} from "@/stores/useLoginUserStore";
 import {SPACE_PERMISSION_ENUM} from "@/constants/space";
@@ -231,7 +241,16 @@ const doDelete = async ()=>{
       const res = await deletePictureUsingPost({ id })
       if (res.data.code === 0) {
         message.success('删除成功')
-        router.push('/')
+
+        // 标记需要刷新的页面
+        const spaceId = picture.value.spaceId
+        if (spaceId) {
+          // 如果图片属于某个空间，返回该空间
+          router.push(`/space/${spaceId}`)
+        } else {
+          // 返回首页
+          router.push('/')
+        }
       } else {
         message.error('删除失败')
       }
@@ -272,17 +291,7 @@ const doDownload = async () => {
     // 下载失败时弹出支付框
     paymentModalRef.value.visible = true
   }
-
-
 }
-
-
-
-
-
-
-
-
 
 onMounted(()=>{
   fetchPictureDetail()
@@ -422,6 +431,11 @@ const doShare = () => {
   if (shareModalRef.value) {
     shareModalRef.value.openModal()
   }
+}
+
+// 返回按钮处理
+const goBack = () => {
+  router.back()
 }
 </script>
 

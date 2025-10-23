@@ -4,11 +4,17 @@
   <div id="picture-list">
     <Waterfall v-if="dataList.length > 0" :list="dataList" :width="300" :breakpoints="breakpoints">
       <template #default="{ item: picture }">
-          <a-card>
+          <a-card class="picture-card">
             <template #cover>
-              <!-- @dragstart="handleDragStart" 禁止拖拽 -->
-              <div @dragstart="handleDragStart" @click="doClickPicture(picture)">
+              <!-- 批量删除模式下显示勾选框 -->
+              <div class="picture-cover-wrapper" @dragstart="handleDragStart" @click="handlePictureClick(picture, $event)">
                 <LazyImg :url="picture.thumbnailUrl??picture.url" />
+                <div v-if="batchDeleteMode" class="checkbox-overlay" @click.stop>
+                  <a-checkbox
+                    :checked="isSelected(picture.id)"
+                    @change="(e) => handleCheckboxChange(picture.id, e.target.checked)"
+                  />
+                </div>
               </div>
             </template>
 <!--            <a-card-meta v-if="picture.tagList && picture.tagList.length > 0">-->
@@ -77,6 +83,12 @@ interface Props {
   onReload?: () => void
   canEdit?: boolean
   canDelete?: boolean
+  // 批量删除模式
+  batchDeleteMode?: boolean
+  // 已选中的图片ID列表
+  selectedIds?: number[]
+  // 选中状态变化回调
+  onSelect?: (pictureId: number, selected: boolean) => void
 }
 
 //定义默认值
@@ -283,6 +295,59 @@ const breakpoints = ref({
     rowPerView: 1,
   },
 })
+
+// ---- 批量删除相关 ----
+// 判断图片是否被选中
+const isSelected = (pictureId: number | undefined) => {
+  if (!pictureId || !props.selectedIds) return false
+  return props.selectedIds.includes(pictureId)
+}
+
+// 处理勾选框变化
+const handleCheckboxChange = (pictureId: number | undefined, checked: boolean) => {
+  if (!pictureId) return
+  props.onSelect?.(pictureId, checked)
+}
+
+// 处理图片点击
+const handlePictureClick = (picture: API.PictureVO, event: MouseEvent) => {
+  // 批量删除模式下，点击图片等同于切换勾选状态
+  if (props.batchDeleteMode) {
+    event.preventDefault()
+    if (picture.id) {
+      const currentSelected = isSelected(picture.id)
+      handleCheckboxChange(picture.id, !currentSelected)
+    }
+  } else {
+    // 非批量删除模式，正常跳转到详情页
+    doClickPicture(picture)
+  }
+}
 </script>
 
-<style scoped></style>
+<style scoped>
+.picture-card {
+  position: relative;
+}
+
+.picture-cover-wrapper {
+  position: relative;
+  cursor: pointer;
+}
+
+.checkbox-overlay {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.checkbox-overlay :deep(.ant-checkbox-wrapper) {
+  display: flex;
+  align-items: center;
+}
+</style>

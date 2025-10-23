@@ -49,6 +49,14 @@
             >
               刷新
             </a-button>
+            <a-button
+              v-if="rowSelection.selectedRowKeys.length > 0"
+              danger
+              @click="doBatchDelete"
+              size="middle"
+            >
+              批量删除 ({{ rowSelection.selectedRowKeys.length }})
+            </a-button>
           </a-space>
         </a-form-item>
       </a-form>
@@ -93,7 +101,11 @@
             <a-tag v-if="record.categoryInfo" color="green">
               {{ record.categoryInfo.name }}
             </a-tag>
-            <span v-else>无</span>
+            <span v-else>
+              <a-tag>
+              默认
+              </a-tag>
+              </span>
           </template>
           <!--        <template v-if="column.dataIndex === 'tags'">-->
           <!--          <a-space wrap>-->
@@ -168,7 +180,9 @@
 <script lang="ts" setup>
 import { computed, h, onMounted, reactive, ref } from 'vue'
 import {
-  deletePictureUsingPost, doPictureReviewUsingPost,
+  deletePictureUsingPost,
+  deletePictureByBatchUsingPost,
+  doPictureReviewUsingPost,
   listPictureByPageUsingPost,
 } from '@/api/PictureController.ts'
 import { message,Modal} from 'ant-design-vue'
@@ -492,11 +506,11 @@ const handleReview = async (record: API.Picture, reviewStatus: number) => {
 }
 
 // 选项选中的 key 数组，存放 图片 ID
-const selectedRowKeys = ref<string[]>([])
+const selectedRowKeys = ref<number[]>([])
 // 选项操作配置
 const rowSelection = reactive({
-  selectedRowKeys: [] as string[],
-  onChange: (keys: string[]) => {
+  selectedRowKeys: [] as number[],
+  onChange: (keys: number[]) => {
     rowSelection.selectedRowKeys = keys
   },
   // 可选：添加选择框列配置
@@ -511,6 +525,43 @@ const refreshResetData = () => {
   resetPictureSearchParams()
   fetchData()
   message.success('刷新成功')
+}
+
+/**
+ * 批量删除图片
+ */
+const doBatchDelete = async () => {
+  if (rowSelection.selectedRowKeys.length === 0) {
+    message.warning('请先选择要删除的图片')
+    return
+  }
+
+  Modal.confirm({
+    title: '批量删除图片',
+    content: `确定要删除选中的 ${rowSelection.selectedRowKeys.length} 张图片吗？删除后不可恢复！`,
+    okText: '确定',
+    cancelText: '取消',
+    okButtonProps: { danger: true },
+    onOk: async () => {
+      try {
+        // rowSelection.selectedRowKeys 已经是 number[] 类型，直接使用
+        const res = await deletePictureByBatchUsingPost({ ids: rowSelection.selectedRowKeys })
+
+        if (res.data.code === 0) {
+          message.success(`成功删除 ${rowSelection.selectedRowKeys.length} 张图片`)
+          // 清空选中项
+          rowSelection.selectedRowKeys = []
+          // 刷新数据
+          await fetchData()
+        } else {
+          message.error('批量删除失败：' + res.data.message)
+        }
+      } catch (error) {
+        message.error('批量删除失败，请稍后重试')
+        console.error('批量删除错误：', error)
+      }
+    }
+  })
 }
 </script>
 

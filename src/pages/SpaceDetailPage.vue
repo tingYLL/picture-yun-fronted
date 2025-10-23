@@ -3,7 +3,7 @@
     <a-flex justify="space-between">
       <h2>{{ space.spaceName }} ({{SPACE_TYPE_MAP[space.spaceType]}})</h2>
       <a-space size="middle">
-        <a-button type="primary" :href="`/add_picture?spaceId=${id}`" target="_blank" v-if="canUploadPicture"><CloudUploadOutlined/>上传图片</a-button>
+        <a-button type="primary" @click="goToUploadPicture" v-if="canUploadPicture"><CloudUploadOutlined/>上传图片</a-button>
         <a-button
           type="primary"
           ghost
@@ -24,7 +24,7 @@
         >
           空间分析
         </a-button>
-        <a-button :icon="h(EditOutlined)" @click="doBatchEdit" v-if="canEditPicture">批量编辑</a-button>
+        <a-button :icon="h(DeleteOutlined)" @click="toggleBatchDeleteMode" v-if="canDeletePicture">批量删除</a-button>
 <!--        <a-tooltip :title="`占用空间${formatSize(space.totalSize)} / ${formatSize(space.maxSize)}`">-->
 <!--          <a-progress-->
 <!--            type="circle"-->
@@ -89,8 +89,32 @@
       <a-empty description="您还没有上传任何图片" />
     </div>
     <template v-else>
-      <PictureList :dataList="dataList" :loading="loading" :showOp="true" :onReload="fetchData"
-                   :canEdit="canEditPicture" :canDelete="canDeletePicture"/>
+      <!-- 批量删除操作栏 -->
+      <div v-if="isBatchDeleteMode" class="batch-delete-bar">
+        <a-space>
+          <a-checkbox :checked="isAllSelected" @change="(e) => toggleSelectAll(e.target.checked)">全选</a-checkbox>
+          <a-button
+            type="primary"
+            :disabled="selectedPictureIds.length === 0"
+            @click="doBatchDelete"
+          >
+            删除 ({{ selectedPictureIds.length }})
+          </a-button>
+          <a-button @click="toggleBatchDeleteMode">取消</a-button>
+        </a-space>
+      </div>
+
+      <PictureList
+        :dataList="dataList"
+        :loading="loading"
+        :showOp="true"
+        :onReload="fetchData"
+        :canEdit="canEditPicture"
+        :canDelete="canDeletePicture"
+        :batchDeleteMode="isBatchDeleteMode"
+        :selectedIds="selectedPictureIds"
+        :onSelect="onPictureSelect"
+      />
       <!--    分页-->
       <a-pagination
         v-if="total > 0"
@@ -126,7 +150,7 @@ import {
   BarChartOutlined
 } from '@ant-design/icons-vue'
 import {useLoginUserStore} from "@/stores/useLoginUserStore";
-import {listPictureVoByPageUsingPost, searchPictureByColorUsingPost} from "@/api/pictureController";
+import {listPictureVoByPageUsingPost, searchPictureByColorUsingPost, deletePictureByBatchUsingPost} from "@/api/pictureController";
 import PictureList from '@/components/PictuerList.vue'
 import PictureSearchForm from "@/components/PictureSearchForm.vue";
 import {ColorPicker} from 'vue3-colorpicker';
@@ -258,6 +282,80 @@ const doBatchEdit = () => {
   }
 }
 
+// ---- 批量删除图片 -----
+// 批量删除模式
+const isBatchDeleteMode = ref(false)
+// 已选中的图片ID列表
+const selectedPictureIds = ref<number[]>([])
+// 全选状态
+const isAllSelected = ref(false)
+
+// 切换批量删除模式
+const toggleBatchDeleteMode = () => {
+  isBatchDeleteMode.value = !isBatchDeleteMode.value
+  // 退出批量删除模式时，清空选中状态
+  if (!isBatchDeleteMode.value) {
+    selectedPictureIds.value = []
+    isAllSelected.value = false
+  }
+}
+
+// 处理图片选中状态变化
+const onPictureSelect = (pictureId: number, selected: boolean) => {
+  if (selected) {
+    if (!selectedPictureIds.value.includes(pictureId)) {
+      selectedPictureIds.value.push(pictureId)
+    }
+  } else {
+    selectedPictureIds.value = selectedPictureIds.value.filter(id => id !== pictureId)
+  }
+  // 更新全选状态
+  isAllSelected.value = selectedPictureIds.value.length === dataList.value.length && dataList.value.length > 0
+}
+
+// 全选/取消全选
+const toggleSelectAll = (checked: boolean) => {
+  isAllSelected.value = checked
+  if (checked) {
+    selectedPictureIds.value = dataList.value.map(picture => picture.id!).filter(id => id !== undefined)
+  } else {
+    selectedPictureIds.value = []
+  }
+}
+
+// 批量删除图片
+const doBatchDelete = async () => {
+  if (selectedPictureIds.value.length === 0) {
+    message.warning('请先选择要删除的图片')
+    return
+  }
+
+  Modal.confirm({
+    title: '批量删除图片',
+    content: `确认删除 ${selectedPictureIds.value.length} 张图片，删除后不可恢复`,
+    okText: '确认删除',
+    okType: 'danger',
+    cancelText: '暂不删除',
+    onOk: async () => {
+      const res = await deletePictureByBatchUsingPost({
+        ids: selectedPictureIds.value
+      })
+      if (res.data.code === 0) {
+        message.success('删除成功')
+        // 清空选中状态
+        selectedPictureIds.value = []
+        isAllSelected.value = false
+        // 退出批量删除模式
+        isBatchDeleteMode.value = false
+        // 重新加载数据
+        fetchData()
+      } else {
+        message.error('删除失败：' + res.data.message)
+      }
+    }
+  })
+}
+
 //如果当前页面接收的id发生变化，就会及时地触发数据重新加载
 watch(
   ()=>props.id,
@@ -273,12 +371,31 @@ const getProgressColor = (ratio: number) => {
   if (ratio < 0.8) return '#FFD166'
   return '#D90429'
 }
+
+// 跳转到上传图片页面
+const goToUploadPicture = () => {
+  router.push({
+    path: '/add_picture',
+    query: {
+      spaceId: props.id
+    }
+  })
+}
 </script>
 
 <style scoped>
 #spaceDetailPage {
   margin-bottom: 16px;
 }
+
+.batch-delete-bar {
+  background: #f5f5f5;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
 .usage-section {
   margin-top: 10px;
   margin-bottom: 0;

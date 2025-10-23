@@ -64,9 +64,16 @@ const loading = ref<boolean>(false);
  */
 const beforeUpload = (file: UploadProps['fileList'][number]) => {
   const loginUser = loginUserStore.loginUser
-  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
-  if (!isJpgOrPng) {
-    message.error('不支持上传该格式的图片，推荐 jpg 或 png');
+  // 通过 MIME 类型和文件扩展名双重校验
+  const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+  const fileName = file.name.toLowerCase();
+  const validExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+  const hasValidType = validTypes.includes(file.type);
+  const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+  const isValidImage = hasValidType || hasValidExtension;
+
+  if (!isValidImage) {
+    message.error('不支持上传该格式的图片，推荐 jpg 、webp、或 png');
   }
   const isLt2M = file.size / 1024 / 1024 < 2;
   const isLt5M = file.size / 1024 / 1024 < 5;
@@ -74,12 +81,12 @@ const beforeUpload = (file: UploadProps['fileList'][number]) => {
     if(!isLt5M){
       message.error('不能上传超过5MB的图片');
     }
-    return isJpgOrPng && isLt5M;
+    return isValidImage && isLt5M;
   }else{
     if (!isLt2M) {
       message.error('不能上传超过2MB的图片');
     }
-    return isJpgOrPng && isLt2M;
+    return isValidImage && isLt2M;
   }
 
 };
