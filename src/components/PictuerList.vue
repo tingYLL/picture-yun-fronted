@@ -7,7 +7,8 @@
           <a-card class="picture-card">
             <template #cover>
               <!-- 批量删除模式下显示勾选框 -->
-              <div class="picture-cover-wrapper" @dragstart="handleDragStart" @click="handlePictureClick(picture, $event)">
+<!--              <div class="picture-cover-wrapper" @dragstart="handleDragStart" @click="handlePictureClick(picture, $event)">-->
+              <div class="picture-cover-wrapper"  @click="handlePictureClick(picture, $event)">
                 <LazyImg :url="picture.thumbnailUrl??picture.url" />
                 <div v-if="batchDeleteMode" class="checkbox-overlay" @click.stop>
                   <a-checkbox
@@ -15,39 +16,12 @@
                     @change="(e) => handleCheckboxChange(picture.id, e.target.checked)"
                   />
                 </div>
+                <!-- 浏览量显示在图片左下角 -->
+                <div class="view-count-overlay">
+                  <EyeOutlined />
+                  {{ formatNumber(picture.viewQuantity) }}
+                </div>
               </div>
-            </template>
-<!--            <a-card-meta v-if="picture.tagList && picture.tagList.length > 0">-->
-<!--              <template #description>-->
-<!--                <a-flex justify="center">-->
-<!--                  <a-tag v-for="tag in picture.tagList" :key="tag">-->
-<!--                    {{ tag }}-->
-<!--                  </a-tag>-->
-<!--                </a-flex>-->
-<!--              </template>-->
-<!--            </a-card-meta>-->
-            <template #actions>
-              <div>
-                <EyeOutlined />
-                {{ formatNumber(picture.viewQuantity) }}
-              </div>
-              <div @click="(e) => doLike(picture)">
-                <LikeFilled v-if="picture.loginUserIsLike" />
-                <LikeOutlined v-else />
-                {{ formatNumber(picture.likeQuantity) }}
-              </div>
-              <div @click="(e) => doCollect(picture)">
-                <StarFilled v-if="picture.loginUserIsCollect" />
-                <StarOutlined v-else />
-                {{ formatNumber(picture.collectQuantity) }}
-              </div>
-              <div  @click="(e) => doSharePicture(picture)">
-                <ShareAltOutlined />
-                {{ formatNumber(picture.shareQuantity) }}
-              </div>
-<!--              <div @click="(e) => doSearchPicture(picture)">-->
-<!--                <SearchOutlined />-->
-<!--              </div>-->
             </template>
           </a-card>
       </template>
@@ -333,6 +307,25 @@ const handlePictureClick = (picture: API.PictureVO, event: MouseEvent) => {
 .picture-cover-wrapper {
   position: relative;
   cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.picture-cover-wrapper:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+}
+
+.picture-cover-wrapper:hover img {
+  transform: scale(1.02);
+  transition: transform 0.3s ease;
+}
+
+.picture-cover-wrapper .lazy-image {
+  transition: transform 0.3s ease;
+  border-radius: 8px;
 }
 
 .checkbox-overlay {
@@ -350,4 +343,25 @@ const handlePictureClick = (picture: API.PictureVO, event: MouseEvent) => {
   display: flex;
   align-items: center;
 }
+
+.view-count-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 35px;
+  z-index: 10;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.6) 30%, rgba(0, 0, 0, 0.3) 70%, rgba(0, 0, 0, 0) 100%);
+  color: #fff;
+  padding: 12px 12px 8px 12px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  backdrop-filter: blur(4px);
+  opacity: 1;
+  transform: translateY(0);
+}
+
 </style>
