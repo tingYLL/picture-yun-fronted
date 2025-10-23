@@ -121,6 +121,7 @@
         v-model:current="searchParams.current"
         v-model:pageSize="searchParams.pageSize"
         :total="total"
+        :show-total="() => `共 ${total} 条`"
         @change="onPageChange"
         style="text-align: right; margin-top: 16px"
       />

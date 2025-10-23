@@ -3,14 +3,6 @@
     <a-row :wrap="false" align="middle">
       <a-col flex="auto">
         <div style="display: flex; align-items: center;">
-          <a-button
-            type="text"
-            class="sider-trigger"
-            @click="$emit('toggle-sider')"
-          >
-            <MenuFoldOutlined v-if="!collapsed" />
-            <MenuUnfoldOutlined v-else />
-          </a-button>
           <router-link to="/">
             <div class="title-bar">
               <div class="title">啵哩啵哩</div>
@@ -99,8 +91,7 @@
 <script lang="ts" setup>
 import {computed, h, ref, onMounted} from 'vue';
 import {HomeOutlined,LogoutOutlined,UserOutlined,CrownOutlined,StarOutlined,
-  CloudDownloadOutlined,RightOutlined,MenuFoldOutlined,
-  MenuUnfoldOutlined,SketchOutlined} from '@ant-design/icons-vue';
+  CloudDownloadOutlined,RightOutlined,SketchOutlined} from '@ant-design/icons-vue';
 import {MenuProps, message} from 'ant-design-vue';
 import {useRouter} from "vue-router";
 import {useLoginUserStore} from "@/stores/useLoginUserStore";
@@ -108,15 +99,6 @@ import {userLogoutUsingPost} from "@/api/userController";
 import {getRemainingDownloadsUsingGet} from "@/api/downloadController";
 import PictureReleaseListPage from '@/pages/PictureReleaseListPage.vue'
 import PaymentModal from './PaymentModal.vue'
-
-// 接收 props 和定义 emits
-defineProps<{
-  collapsed: boolean;
-}>();
-
-defineEmits<{
-  (e: 'toggle-sider'): void;
-}>();
 
 const loginUserStore = useLoginUserStore()
 
@@ -257,17 +239,6 @@ const doLogout = async ()=>{
   display: flex;
   align-items: center;
   margin-right: 24px;
-}
-
-.sider-trigger {
-  font-size: 18px;
-  padding: 0 16px;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.sider-trigger:hover {
-  background: rgba(0, 0, 0, 0.06);
 }
 
 .title {

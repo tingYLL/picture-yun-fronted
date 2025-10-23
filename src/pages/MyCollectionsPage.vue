@@ -215,7 +215,8 @@ const handlePageChange = (page: number, pageSize: number) => {
 // 点击图片
 const doClickPicture = (picture: API.PictureVO) => {
   if (picture?.id) {
-    router.push(`/picture/${picture.id}`)
+    // router.push(`/picture/${picture.id}`)
+    window.open(`/picture/${picture.id}`)
   }
 }
 
@@ -223,7 +224,8 @@ const doClickPicture = (picture: API.PictureVO) => {
 const doViewPicture = (picture: API.PictureVO, e: Event) => {
   e.stopPropagation()
   if (picture?.id) {
-    router.push(`/picture/${picture.id}`)
+    // router.push(`/picture/${picture.id}`)
+    window.open(`/picture/${picture.id}`)
   }
 }
 

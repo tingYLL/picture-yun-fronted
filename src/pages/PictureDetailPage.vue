@@ -1,15 +1,15 @@
 <template>
   <div id="pictureDetailPage">
-    <!-- 返回按钮 -->
-    <div style="margin-bottom: 16px">
-      <a-button
-        type="text"
-        :icon="h(ArrowLeftOutlined)"
-        @click="goBack"
-      >
-        返回
-      </a-button>
-    </div>
+<!--    &lt;!&ndash; 返回按钮 &ndash;&gt;-->
+<!--    <div style="margin-bottom: 16px">-->
+<!--      <a-button-->
+<!--        type="text"-->
+<!--        :icon="h(ArrowLeftOutlined)"-->
+<!--        @click="goBack"-->
+<!--      >-->
+<!--        返回-->
+<!--      </a-button>-->
+<!--    </div>-->
     <a-row :gutter="[16,16]">
 <!--      图片预览-->
       <a-col :sm="24" :md="16" :xl="18">

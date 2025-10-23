@@ -77,17 +77,10 @@ const props = withDefaults(defineProps<Props>(), {
 const router = useRouter()
 //跳转至图片详情页
 const doClickPicture = (picture: API.PictureVO) => {
-  router.push({
-    path: `/picture/${picture.id}`,
-  })
-
-  // 通过路由解析生成完整路径
-  // const resolved = router.resolve({
-  //   path: `/picture/${picture.id}`
-  // });
-  //
-  // // 在新标签页打开路由对应的绝对路径
-  // window.open(resolved.href, '_blank');
+  // router.push({
+  //   path: `/picture/${picture.id}`,
+  // })
+  window.open(`/picture/${picture.id}`)
 }
 
 const doSearch = (picture, e) => {

@@ -2,10 +2,10 @@
   <div id="basicLayout">
     <a-layout style="min-height: 100vh">
       <a-layout-header class="header">
-        <GlobalHeader :collapsed="collapsed" @toggle-sider="toggleSider" />
+        <GlobalHeader />
       </a-layout-header>
       <a-layout>
-        <GlobalSider class="sider" :collapsed="collapsed"/>
+        <GlobalSider class="sider" :collapsed="collapsed" @toggle-sider="toggleSider" />
         <a-layout-content class="content">
           <router-view />
         </a-layout-content>
