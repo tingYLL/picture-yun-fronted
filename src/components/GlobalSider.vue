@@ -17,15 +17,16 @@
       >
       </a-menu>
 
-      <!-- 收缩按钮 -->
-      <div v-if="!collapsed" class="sider-collapse-btn" @click="$emit('toggle-sider')">
-        <MenuFoldOutlined />
-      </div>
     </a-layout-sider>
 
     <!-- 展开按钮（当侧边栏收缩时显示在外部） -->
-    <div v-if="collapsed" class="sider-expand-btn" @click="$emit('toggle-sider')">
+    <div v-if="collapsed" class="sider-toggle-btn sider-expand-btn" @click="$emit('toggle-sider')">
       <MenuUnfoldOutlined />
+    </div>
+
+    <!-- 收缩按钮（当侧边栏展开时显示在外部） -->
+    <div v-if="!collapsed" class="sider-toggle-btn sider-collapse-btn-external" @click="$emit('toggle-sider')">
+      <MenuFoldOutlined />
     </div>
   </div>
 </template>
@@ -132,6 +133,32 @@ router.afterEach((to,from,next)=>{
 }
 
 .sider-expand-btn:hover {
+  color: #1890ff;
+  background: #e6f7ff;
+  border-color: #1890ff;
+}
+
+.sider-collapse-btn-external {
+  position: fixed;
+  top: 50%;
+  left: 200px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #666;
+  font-size: 16px;
+  transition: all 0.3s;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 0 6px 6px 0;
+  z-index: 1000;
+}
+
+.sider-collapse-btn-external:hover {
   color: #1890ff;
   background: #e6f7ff;
   border-color: #1890ff;
