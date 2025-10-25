@@ -155,7 +155,7 @@ router.afterEach((to,from,next)=>{
   background: #fff;
   border: 1px solid #d9d9d9;
   border-radius: 0 6px 6px 0;
-  z-index: 1000;
+  z-index: 1001; /* 比侧边栏容器更高的z-index */
 }
 
 .sider-collapse-btn-external:hover {

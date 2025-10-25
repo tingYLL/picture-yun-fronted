@@ -1,11 +1,14 @@
 <template>
-  <div id="basicLayout">
+  <div id="basicLayout" :class="{ collapsed: collapsed }">
     <a-layout style="min-height: 100vh">
       <a-layout-header class="header">
         <GlobalHeader />
       </a-layout-header>
       <a-layout>
-        <GlobalSider class="sider" :collapsed="collapsed" @toggle-sider="toggleSider" />
+        <!-- 侧边栏容器 -->
+        <div class="sider-container" :class="{ collapsed: collapsed }">
+          <GlobalSider class="sider" :collapsed="collapsed" @toggle-sider="toggleSider" />
+        </div>
         <a-layout-content class="content">
           <router-view />
         </a-layout-content>
@@ -40,10 +43,22 @@ const toggleSider = () => {
   margin-bottom: 1px;
 }
 
+#basicLayout .sider-container {
+  position: fixed;
+  left: 0;
+  top: 64px; /* header高度 */
+  height: calc(100vh - 64px);
+  z-index: 999;
+  background: #fff;
+  border-right: 0.5px solid #eee;
+  transition: all 0.3s ease;
+}
+
 #basicLayout .sider{
   background-color: #fff;
-  border-right: 0.5px solid #eee;
   padding-top: 20px;
+  height: 100%;
+  overflow-y: auto;
 }
 
 #basicLayout :deep(.ant-menu-root) {
@@ -53,8 +68,19 @@ const toggleSider = () => {
 
 #basicLayout .content {
   padding: 28px;
+  padding-left: 228px; /* 侧边栏宽度 + 额外间距 */
   background: linear-gradient(to right, #fefefe, #fff);
-  /* margin-bottom: 28px; */
+  min-height: calc(100vh - 64px);
+  transition: padding-left 0.3s ease;
+}
+
+/* 当侧边栏收缩时的样式 */
+#basicLayout .sider-container.collapsed {
+  left: -200px;
+}
+
+#basicLayout.collapsed .content {
+  padding-left: 28px;
 }
 
 #basicLayout .footer {
