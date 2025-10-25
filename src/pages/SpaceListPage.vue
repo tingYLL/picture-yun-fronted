@@ -6,7 +6,7 @@
         <!-- 顶部标题 -->
         <a-typography>
           <a-typography-title :level="3">
-            <CloudOutlined/>
+            <CloudOutlined />
             云空间
           </a-typography-title>
         </a-typography>
@@ -24,23 +24,35 @@
       <!-- 空间列表 -->
       <div v-else-if="allSpaces.length > 0" class="space-list">
         <a-row :gutter="[16, 16]">
-          <a-col
-            v-for="space in allSpaces"
-            :key="space.spaceId"
-            :xs="24"
-            :sm="12"
-            :md="8"
-            :lg="6"
-          >
-            <a-card
-              hoverable
-              class="space-card"
-              @click="enterSpace(space.spaceId)"
-            >
+          <a-col v-for="space in allSpaces" :key="space.spaceId" :xs="24" :sm="12" :md="8" :lg="6">
+            <a-card hoverable class="space-card" @click="enterSpace(space.spaceId)">
               <!-- 私有空间标识 -->
               <template v-if="space.isPrivate">
                 <a-badge-ribbon text="个人空间" color="blue" />
               </template>
+              <!-- 操作按钮 -->
+              <a-dropdown
+                v-if="canDeleteSpace(space)"
+                :trigger="['click']"
+                placement="bottomRight"
+                class="space-actions-dropdown"
+                @click.stop
+              >
+                <a-button type="text" size="small" class="space-actions-btn" @click.stop>
+                  <EllipsisOutlined />
+                </a-button>
+                <template #overlay>
+                  <a-menu>
+                    <a-menu-item
+                      @click="deleteSpace(space.spaceId, space.spaceName)"
+                      class="delete-menu-item"
+                    >
+                      <DeleteOutlined style="color: #ff4d4f" />
+                      <span style="color: #ff4d4f; margin-left: 8px">删除空间</span></a-menu-item
+                    >
+                  </a-menu>
+                </template>
+              </a-dropdown>
 
               <a-card-meta>
                 <template #title>
@@ -54,9 +66,7 @@
                   <div class="space-info">
                     <div class="info-item" v-if="space.isPrivate">
                       <span class="label">角色：</span>
-                      <a-tag >
-                        创建者
-                      </a-tag>
+                      <a-tag> 创建者 </a-tag>
                     </div>
                     <div class="info-item" v-if="!space.isPrivate">
                       <span class="label">角色：</span>
@@ -68,7 +78,7 @@
                       <span class="label">图片数量：</span>
                       <span>{{ space.size || 0 }}</span>
                     </div>
-                    <div class="info-item" >
+                    <div class="info-item">
                       <span class="label">创建时间：</span>
                       <span>{{ formatTime(space.createTime) }}</span>
                     </div>
@@ -83,17 +93,8 @@
           </a-col>
 
           <!-- 创建空间卡片 -->
-          <a-col
-            :xs="24"
-            :sm="12"
-            :md="8"
-            :lg="6"
-          >
-            <a-card
-              hoverable
-              class="space-card add-space-card"
-              @click="goToAddSpace"
-            >
+          <a-col :xs="24" :sm="12" :md="8" :lg="6">
+            <a-card hoverable class="space-card add-space-card" @click="goToAddSpace">
               <template #cover>
                 <div class="add-space-cover">
                   <PlusOutlined class="add-space-icon" />
@@ -116,9 +117,7 @@
       <!-- 空状态 -->
       <div v-else class="empty-container">
         <a-empty description="暂无空间">
-          <a-button type="primary" @click="goToAddSpace">
-            创建第一个空间
-          </a-button>
+          <a-button type="primary" @click="goToAddSpace"> 创建第一个空间 </a-button>
         </a-empty>
       </div>
     </div>
@@ -131,13 +130,23 @@ import { useRouter } from 'vue-router'
 import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
 import { listSpaceVoByPageUsingPost } from '@/api/spaceController.ts'
 import { listMyTeamSpaceUsingPost } from '@/api/spaceUserController.ts'
-import { message } from 'ant-design-vue'
-import { SPACE_TYPE_ENUM, SPACE_LEVEL_MAP, SPACE_LEVEL_ENUM, SPACE_ROLE_MAP } from '@/constants/space.ts'
+import { deleteSpaceUsingPost } from '@/api/spaceController.ts'
+import { message, Modal } from 'ant-design-vue'
+import {
+  SPACE_TYPE_ENUM,
+  SPACE_LEVEL_MAP,
+  SPACE_LEVEL_ENUM,
+  SPACE_ROLE_MAP,
+} from '@/constants/space.ts'
 import {
   PlusOutlined,
   CloudOutlined,
-  TeamOutlined,UserOutlined,
-  RightOutlined, StarOutlined
+  TeamOutlined,
+  UserOutlined,
+  RightOutlined,
+  StarOutlined,
+  DeleteOutlined,
+  EllipsisOutlined,
 } from '@ant-design/icons-vue'
 
 const router = useRouter()
@@ -149,17 +158,17 @@ const teamSpaces = ref<API.SpaceUserVO[]>([])
 
 // 计算所有空间列表，私有空间排在前面
 const allSpaces = computed(() => {
-  const privateSpaceItem = privateSpaces.value.map(space => ({
+  const privateSpaceItem = privateSpaces.value.map((space) => ({
     ...space,
     isPrivate: true,
     spaceId: space.id,
     spaceName: space.spaceName,
     spaceLevel: space.spaceLevel,
     size: space.totalCount,
-    createTime: space.createTime
+    createTime: space.createTime,
   }))
 
-  const teamSpaceItem = teamSpaces.value.map(spaceUser => ({
+  const teamSpaceItem = teamSpaces.value.map((spaceUser) => ({
     ...spaceUser,
     isPrivate: false,
     spaceId: spaceUser.spaceId,
@@ -167,7 +176,7 @@ const allSpaces = computed(() => {
     spaceLevel: spaceUser.spaceLevel,
     size: spaceUser.space.totalCount,
     spaceRole: spaceUser.spaceRole,
-    createTime: spaceUser.space.createTime
+    createTime: spaceUser.space.createTime,
   }))
 
   return [...privateSpaceItem, ...teamSpaceItem]
@@ -190,10 +199,10 @@ const loadUserSpaces = async () => {
         userId: loginUser.id,
         current: 1,
         pageSize: 10, // 获取所有个人空间
-        spaceType: SPACE_TYPE_ENUM.PRIVATE
+        spaceType: SPACE_TYPE_ENUM.PRIVATE,
       }),
       // 查询团队空间
-      listMyTeamSpaceUsingPost()
+      listMyTeamSpaceUsingPost(),
     ])
 
     // 处理个人空间数据
@@ -237,7 +246,7 @@ const getSpaceLevelColor = (level: number) => {
   const colors = {
     [SPACE_LEVEL_ENUM.COMMON]: 'blue',
     [SPACE_LEVEL_ENUM.PROFESSIONAL]: 'green',
-    [SPACE_LEVEL_ENUM.FLAGSHIP]: 'gold'
+    [SPACE_LEVEL_ENUM.FLAGSHIP]: 'gold',
   }
   return colors[level] || 'default'
 }
@@ -252,7 +261,7 @@ const getSpaceRoleColor = (role: string) => {
   const colors = {
     admin: 'red',
     editor: 'orange',
-    viewer: 'blue'
+    viewer: 'blue',
   }
   return colors[role] || 'default'
 }
@@ -265,7 +274,47 @@ const formatTime = (time: string) => {
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
+  })
+}
+
+// 检查是否可以删除空间（权限控制）
+const canDeleteSpace = (space: any) => {
+  const loginUser = loginUserStore.loginUser
+  if (!loginUser?.id) return false
+
+  // 私有空间：只有创建者可以删除
+  if (space.isPrivate) {
+    return space.userId === loginUser.id
+  }
+
+  // 团队空间：只有管理员可以删除
+  return space.spaceRole === 'admin'
+}
+
+// 删除空间
+const deleteSpace = async (spaceId: number, spaceName: string) => {
+  Modal.confirm({
+    title: '确认删除空间？',
+    content: `您确定要删除空间「${spaceName}」吗？此操作不可恢复，空间内的所有图片和数据将被永久删除。`,
+    okText: '确认删除',
+    okType: 'danger',
+    cancelText: '取消',
+    onOk: async () => {
+      try {
+        const res = await deleteSpaceUsingPost({ id: spaceId.toString() })
+        if (res.data.code === 0) {
+          message.success('空间删除成功')
+          // 重新加载空间列表
+          await loadUserSpaces()
+        } else {
+          message.error('删除失败：' + res.data.message)
+        }
+      } catch (error) {
+        console.error('删除空间失败:', error)
+        message.error('删除失败，请重试')
+      }
+    },
   })
 }
 
@@ -317,6 +366,7 @@ onMounted(() => {
   height: 280px;
   background: linear-gradient(135deg, #e6f4ff 0%, #f0f8ff 100%);
   border: 1px solid #d6e9f8;
+  position: relative;
 }
 
 .space-card:hover {
@@ -430,6 +480,47 @@ onMounted(() => {
 .add-space-desc {
   font-size: 12px;
   color: #8c8c8c;
+}
+
+/* 操作按钮样式 */
+.space-actions-dropdown {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+}
+
+.space-actions-btn {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #d9d9d9;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.space-card:hover .space-actions-btn {
+  opacity: 1;
+}
+
+.space-actions-btn:hover {
+  background: #fff;
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+.delete-menu-item {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.delete-menu-item:hover {
+  background: #fff2f0 !important;
 }
 
 /* 响应式设计 */

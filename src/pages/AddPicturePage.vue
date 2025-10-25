@@ -148,9 +148,16 @@ const handleSubmit = async (values: any) => {
   })
   if(res.data.code === 0 && res.data.data){
     message.success('创建成功')
-    router.push({
-      path:`/picture/${pictureId}`
-    })
+    // 跳转到空间页面或图片列表
+    if (spaceId.value) {
+      router.push({
+        path: `/space/${spaceId.value}`
+      })
+    } else {
+      router.push({
+        path: '/'
+      })
+    }
   }else{
     message.error('创建失败'+res.data.message)
   }
