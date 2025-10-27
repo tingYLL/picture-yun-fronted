@@ -841,6 +841,11 @@ declare namespace API {
     userId?: number
   }
 
+  type SpaceUserQuitRequest = {
+    spaceId?: number
+    userId?: number
+  }
+
   type SpaceUserVO = {
     createTime?: string
     id?: number

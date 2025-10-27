@@ -84,3 +84,18 @@ export async function listMyTeamSpaceUsingPost(options?: { [key: string]: any })
     ...(options || {}),
   })
 }
+
+/** quitSpace POST /api/spaceUser/quit */
+export async function quitSpaceUsingPost(
+  body: API.SpaceUserQuitRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseBoolean_>('/api/spaceUser/quit', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}

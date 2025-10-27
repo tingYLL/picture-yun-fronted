@@ -20,23 +20,23 @@
     </a-layout-sider>
 
     <!-- 展开按钮（当侧边栏收缩时显示在外部） -->
-    <div v-if="collapsed" class="sider-toggle-btn sider-expand-btn" @click="$emit('toggle-sider')">
+    <div v-if="collapsed" class="sider-toggle-btn sider-expand-btn" :style="{ left: siderWidth + 'px' }" @click="$emit('toggle-sider')">
       <MenuUnfoldOutlined />
     </div>
 
     <!-- 收缩按钮（当侧边栏展开时显示在外部） -->
-    <div v-if="!collapsed" class="sider-toggle-btn sider-collapse-btn-external" @click="$emit('toggle-sider')">
+    <div v-if="!collapsed" class="sider-toggle-btn sider-collapse-btn-external" :style="{ left: siderWidth + 'px' }" @click="$emit('toggle-sider')">
       <MenuFoldOutlined />
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-import {h, ref} from 'vue';
+import {h, ref, computed} from 'vue';
 import {CloudOutlined,DownloadOutlined,StarOutlined,MenuFoldOutlined,MenuUnfoldOutlined} from '@ant-design/icons-vue';
 import {useRouter} from "vue-router";
 
 // 接收 props 和定义 emits
-defineProps<{
+const props = defineProps<{
   collapsed: boolean;
 }>();
 
@@ -74,6 +74,11 @@ const doMenuClick = ({ key }) => {
 const current = ref<string[]>([]);
 router.afterEach((to,from,next)=>{
   current.value = [to.path]
+})
+
+// 侧边栏宽度，用于按钮位置计算
+const siderWidth = computed(() => {
+  return props.collapsed ? 0 : 200;
 })
 
 </script>
@@ -114,7 +119,6 @@ router.afterEach((to,from,next)=>{
 .sider-expand-btn {
   position: fixed;
   top: 50%;
-  left: 0;
   transform: translateY(-50%);
   width: 20px;
   height: 60px;
@@ -124,7 +128,7 @@ router.afterEach((to,from,next)=>{
   cursor: pointer;
   color: #666;
   font-size: 16px;
-  transition: all 0.3s;
+  transition: all 0.3s, left 0.3s;
   background: #fff;
   border: 1px solid #d9d9d9;
   border-left: none;
@@ -141,7 +145,6 @@ router.afterEach((to,from,next)=>{
 .sider-collapse-btn-external {
   position: fixed;
   top: 50%;
-  left: 200px;
   transform: translateY(-50%);
   width: 20px;
   height: 60px;
@@ -151,7 +154,7 @@ router.afterEach((to,from,next)=>{
   cursor: pointer;
   color: #666;
   font-size: 16px;
-  transition: all 0.3s;
+  transition: all 0.3s, left 0.3s;
   background: #fff;
   border: 1px solid #d9d9d9;
   border-radius: 0 6px 6px 0;

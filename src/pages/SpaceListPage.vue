@@ -32,7 +32,7 @@
               </template>
               <!-- 操作按钮 -->
               <a-dropdown
-                v-if="canDeleteSpace(space)"
+                v-if="canShowActions(space)"
                 :trigger="['click']"
                 placement="bottomRight"
                 class="space-actions-dropdown"
@@ -43,13 +43,24 @@
                 </a-button>
                 <template #overlay>
                   <a-menu>
+                    <!-- 管理员删除空间选项 -->
                     <a-menu-item
+                      v-if="canDeleteSpace(space)"
                       @click="deleteSpace(space.spaceId, space.spaceName)"
                       class="delete-menu-item"
                     >
                       <DeleteOutlined style="color: #ff4d4f" />
-                      <span style="color: #ff4d4f; margin-left: 8px">删除空间</span></a-menu-item
+                      <span style="color: #ff4d4f; margin-left: 8px">删除空间</span>
+                    </a-menu-item>
+                    <!-- 非管理员退出空间选项 -->
+                    <a-menu-item
+                      v-if="canQuitSpace(space)"
+                      @click="quitSpace(space.spaceId, space.spaceName)"
+                      class="quit-menu-item"
                     >
+                      <LogoutOutlined style="color: #fa8c16" />
+                      <span style="color: #fa8c16; margin-left: 8px">退出空间</span>
+                    </a-menu-item>
                   </a-menu>
                 </template>
               </a-dropdown>
@@ -129,7 +140,7 @@ import { ref, computed, onMounted, h } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
 import { listSpaceVoByPageUsingPost } from '@/api/spaceController.ts'
-import { listMyTeamSpaceUsingPost } from '@/api/spaceUserController.ts'
+import { listMyTeamSpaceUsingPost, quitSpaceUsingPost } from '@/api/spaceUserController.ts'
 import { deleteSpaceUsingPost } from '@/api/spaceController.ts'
 import { message, Modal } from 'ant-design-vue'
 import {
@@ -147,6 +158,7 @@ import {
   StarOutlined,
   DeleteOutlined,
   EllipsisOutlined,
+  LogoutOutlined,
 } from '@ant-design/icons-vue'
 
 const router = useRouter()
@@ -278,6 +290,11 @@ const formatTime = (time: string) => {
   })
 }
 
+// 检查是否可以显示操作按钮
+const canShowActions = (space: any) => {
+  return canDeleteSpace(space) || canQuitSpace(space)
+}
+
 // 检查是否可以删除空间（权限控制）
 const canDeleteSpace = (space: any) => {
   const loginUser = loginUserStore.loginUser
@@ -290,6 +307,20 @@ const canDeleteSpace = (space: any) => {
 
   // 团队空间：只有管理员可以删除
   return space.spaceRole === 'admin'
+}
+
+// 检查是否可以退出空间
+const canQuitSpace = (space: any) => {
+  const loginUser = loginUserStore.loginUser
+  if (!loginUser?.id) return false
+
+  // 私有空间不能退出
+  if (space.isPrivate) {
+    return false
+  }
+
+  // 团队空间：非管理员可以退出
+  return space.spaceRole !== 'admin'
 }
 
 // 删除空间
@@ -313,6 +344,41 @@ const deleteSpace = async (spaceId: number, spaceName: string) => {
       } catch (error) {
         console.error('删除空间失败:', error)
         message.error('删除失败，请重试')
+      }
+    },
+  })
+}
+
+// 退出空间
+const quitSpace = async (spaceId: number, spaceName: string) => {
+  const loginUser = loginUserStore.loginUser
+  if (!loginUser?.id) {
+    message.error('用户未登录')
+    return
+  }
+
+  Modal.confirm({
+    title: '确认退出空间？',
+    content: `您确定要退出团队空间「${spaceName}」吗？退出后将无法再访问该空间内的图片和数据。`,
+    okText: '确认退出',
+    okType: 'primary',
+    cancelText: '取消',
+    onOk: async () => {
+      try {
+        const res = await quitSpaceUsingPost({
+          spaceId: spaceId,
+          userId: loginUser.id,
+        })
+        if (res.data.code === 0) {
+          message.success('退出空间成功')
+          // 重新加载空间列表
+          await loadUserSpaces()
+        } else {
+          message.error('退出失败：' + res.data.message)
+        }
+      } catch (error) {
+        console.error('退出空间失败:', error)
+        message.error('退出失败，请重试')
       }
     },
   })
@@ -521,6 +587,15 @@ onMounted(() => {
 
 .delete-menu-item:hover {
   background: #fff2f0 !important;
+}
+
+.quit-menu-item {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.quit-menu-item:hover {
+  background: #fff7e6 !important;
 }
 
 /* 响应式设计 */
