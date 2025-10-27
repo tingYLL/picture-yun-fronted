@@ -85,27 +85,23 @@
               <GiftOutlined />
               <span>兑换码激活</span>
             </div>
-            <p class="redeem-desc">拥有兑换码？立即激活VIP会员</p>
-            <a-input
-              v-model:value="redeemCode"
-              placeholder="请输入兑换码"
-              size="large"
-              class="redeem-input"
-            />
-            <a-button
-              type="primary"
-              @click="handleRedeem"
-              :loading="isRedeeming"
-              size="large"
-              block
-              class="redeem-button"
-            >
-              <GiftOutlined />
-              立即兑换
-            </a-button>
-            <div class="redeem-tips">
-              <InfoCircleOutlined />
-              <span>兑换码请联系管理员获取</span>
+            <div class="redeem-content">
+              <a-input
+                v-model:value="redeemCode"
+                placeholder="拥有兑换码？立即激活VIP会员"
+                size="large"
+                class="redeem-input"
+              />
+              <a-button
+                type="primary"
+                @click="handleRedeem"
+                :loading="isRedeeming"
+                size="large"
+                class="redeem-button"
+              >
+                <GiftOutlined />
+                立即兑换
+              </a-button>
             </div>
           </div>
         </div>
@@ -771,9 +767,10 @@ defineExpose({
 /* 兑换码区域 */
 .redeem-section {
   background: white;
-  padding: 24px;
+  padding: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  margin-top: 16px;
 }
 
 .redeem-header {
@@ -784,7 +781,7 @@ defineExpose({
   font-size: 16px;
   font-weight: 600;
   color: #333;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   padding-bottom: 12px;
   border-bottom: 1px solid #f0f0f0;
 }
@@ -794,15 +791,14 @@ defineExpose({
   font-size: 18px;
 }
 
-.redeem-desc {
-  text-align: center;
-  color: #666;
-  font-size: 14px;
-  margin-bottom: 16px;
+.redeem-content {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
 }
 
 .redeem-input {
-  margin-bottom: 16px;
+  flex: 1;
 }
 
 .redeem-input :deep(.ant-input) {
@@ -819,14 +815,19 @@ defineExpose({
 }
 
 .redeem-button {
-  height: 48px;
+  min-width: 88px;
+  height: 38px;
   border-radius: 8px;
   font-weight: 600;
   font-size: 15px;
-  margin-bottom: 12px;
   background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
   border: none;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .redeem-button:hover {
@@ -835,18 +836,8 @@ defineExpose({
   box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
 }
 
-.redeem-tips {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: #999;
-  text-align: center;
-}
-
-.redeem-tips :deep(.anticon) {
-  font-size: 14px;
-  color: #999;
+.redeem-button :deep(.anticon) {
+  font-size: 16px;
 }
 
 /* 响应式设计 */
