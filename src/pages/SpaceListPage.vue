@@ -507,15 +507,27 @@ onMounted(() => {
 
 /* 创建空间卡片样式 */
 .add-space-card {
-  border: 2px dashed #d9d9d9;
-  background: #fafafa;
+  border: 2px dashed #d9d9d9 !important;
+  background: #fafafa !important;
+  box-sizing: border-box;
 }
 
 .add-space-card:hover {
-  border-color: #1890ff;
-  background: #f0f8ff;
+  border: 2px dashed #1890ff !important;
+  background: #f0f8ff !important;
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* 修复 Card 组件内部样式导致的边框问题 */
+.add-space-card :deep(.ant-card-cover) {
+  margin: 2px 2px 0 2px !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+
+.add-space-card :deep(.ant-card-body) {
+  padding: 16px !important;
 }
 
 .add-space-cover {
