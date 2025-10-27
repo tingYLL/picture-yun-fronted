@@ -134,7 +134,7 @@
 import {computed, h, onMounted, reactive, ref, watch} from "vue";
 import {deleteSpaceUsingPost, getSpaceVoByIdUsingGet} from "@/api/spaceController";
 import {useRoute, useRouter} from "vue-router";
-import {message} from "ant-design-vue";
+import { message, Modal } from 'ant-design-vue'
 import {downloadImage, formatSize} from '@/utils/index'
 import {
   BlockOutlined,

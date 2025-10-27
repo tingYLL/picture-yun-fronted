@@ -18,11 +18,12 @@ export const useLoginUserStore = defineStore('loginUser', () => {
     const res = await getLoginUserUsingGet()
     if (res.data.code === 0 && res.data.data) {
       loginUser.value = res.data.data
+    } else {
+      // 登录态过期或获取失败，重置为未登录状态
+      loginUser.value = {
+        userName: '未登录',
+      }
     }
-    // 测试用户登录，3 秒后自动登录
-    // setTimeout(() => {
-    //   loginUser.value = { userName: '测试用户', id: 1 }
-    // }, 3000)
   }
 
   /**
