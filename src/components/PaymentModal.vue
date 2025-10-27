@@ -26,53 +26,86 @@
 
       <!-- 优化后的主内容区域 -->
       <div class="main-content">
-        <!-- 左侧：会员权益对比 -->
-        <div class="benefits-section">
-          <h3>会员权益对比</h3>
-          <div class="benefits-cards">
-            <div class="benefit-card normal">
-              <div class="benefit-header">
-                <a-tag color="default">普通用户</a-tag>
-                <span class="benefit-price">免费</span>
+        <!-- 左侧：会员权益对比 + 兑换码 -->
+        <div class="left-section">
+          <!-- 会员权益对比 -->
+          <div class="benefits-section">
+            <h3>会员权益对比</h3>
+            <div class="benefits-cards">
+              <div class="benefit-card normal">
+                <div class="benefit-header">
+                  <a-tag color="default">普通用户</a-tag>
+                  <span class="benefit-price">免费</span>
+                </div>
+                <div class="benefit-content">
+                  <div class="benefit-item">
+                    <DownloadOutlined />
+                    <span>每日下载 5 次</span>
+                  </div>
+                  <div class="benefit-item">
+                    <FileSearchOutlined />
+                    <span>基础搜索功能</span>
+                  </div>
+<!--                <div class="benefit-item">-->
+<!--                  <PictureOutlined />-->
+<!--                  <span>标准图片上传</span>-->
+<!--                </div>-->
+                </div>
               </div>
-              <div class="benefit-content">
-                <div class="benefit-item">
-                  <DownloadOutlined />
-                  <span>每日下载 5 次</span>
+              <div class="benefit-card vip">
+                <div class="benefit-header">
+                  <a-tag color="gold">VIP会员</a-tag>
+                  <span class="benefit-price">10元/月</span>
                 </div>
-                <div class="benefit-item">
-                  <FileSearchOutlined />
-                  <span>基础搜索功能</span>
-                </div>
-                <div class="benefit-item">
-                  <PictureOutlined />
-                  <span>标准图片上传</span>
+                <div class="benefit-content">
+                  <div class="benefit-item">
+                    <DownloadOutlined />
+                    <span>每日下载 20 次</span>
+                  </div>
+                  <div class="benefit-item">
+                    <FileSearchOutlined />
+                    <span>高级搜索功能</span>
+                  </div>
+<!--                <div class="benefit-item">-->
+<!--                  <PictureOutlined />-->
+<!--                  <span>高清图片上传</span>-->
+<!--                </div>-->
+<!--                <div class="benefit-highlight">-->
+<!--                  <CrownOutlined />-->
+<!--                  <span>专享特权</span>-->
+<!--                </div>-->
                 </div>
               </div>
             </div>
-            <div class="benefit-card vip">
-              <div class="benefit-header">
-                <a-tag color="gold">VIP会员</a-tag>
-                <span class="benefit-price">10元/月</span>
-              </div>
-              <div class="benefit-content">
-                <div class="benefit-item">
-                  <DownloadOutlined />
-                  <span>每日下载 20 次</span>
-                </div>
-                <div class="benefit-item">
-                  <FileSearchOutlined />
-                  <span>高级搜索功能</span>
-                </div>
-                <div class="benefit-item">
-                  <PictureOutlined />
-                  <span>高清图片上传</span>
-                </div>
-                <div class="benefit-highlight">
-                  <CrownOutlined />
-                  <span>专享特权</span>
-                </div>
-              </div>
+          </div>
+
+          <!-- 兑换码区域 -->
+          <div class="redeem-section">
+            <div class="redeem-header">
+              <GiftOutlined />
+              <span>兑换码激活</span>
+            </div>
+            <p class="redeem-desc">拥有兑换码？立即激活VIP会员</p>
+            <a-input
+              v-model:value="redeemCode"
+              placeholder="请输入兑换码"
+              size="large"
+              class="redeem-input"
+            />
+            <a-button
+              type="primary"
+              @click="handleRedeem"
+              :loading="isRedeeming"
+              size="large"
+              block
+              class="redeem-button"
+            >
+              <GiftOutlined />
+              立即兑换
+            </a-button>
+            <div class="redeem-tips">
+              <InfoCircleOutlined />
+              <span>兑换码请联系管理员获取</span>
             </div>
           </div>
         </div>
@@ -87,8 +120,8 @@
                 <div class="payment-method-option">
                   <AlipayCircleOutlined class="payment-icon alipay-icon" />
                   <span>支付宝</span>
-                  <a-tag color="orange" class="recommend-tag">推荐</a-tag>
                 </div>
+                <a-tag color="orange" class="recommend-badge">推荐</a-tag>
               </a-radio-button>
               <a-radio-button value="wechat">
                 <div class="payment-method-option">
@@ -99,59 +132,26 @@
             </a-radio-group>
           </div>
 
-          <!-- 支付内容区域 -->
-          <div class="payment-content">
-            <!-- 二维码区域 -->
-            <div class="qr-code-section">
-              <div class="qr-code">
-                <div class="qr-code-header">
-                  <span v-if="paymentMethod === 'alipay'" class="payment-name alipay-text">
-                    <AlipayCircleOutlined class="payment-icon-small" />
-                    支付宝扫码支付
-                  </span>
-                  <span v-else class="payment-name wechat-text">
-                    <WechatOutlined class="payment-icon-small" />
-                    微信扫码支付
-                  </span>
-                </div>
-                <div class="qr-code-wrapper">
-                  <canvas ref="qrCodeCanvas" width="180" height="180" />
-                </div>
-                <p class="qr-tips">请使用{{ paymentMethod === 'alipay' ? '支付宝' : '微信' }}扫描二维码完成支付</p>
-                <div class="qr-footer">
-                  <span class="amount">¥10.00</span>
-                  <span class="countdown">有效期：{{ countdown }}</span>
-                </div>
+          <!-- 二维码区域 -->
+          <div class="qr-code-section">
+            <div class="qr-code">
+              <div class="qr-code-header">
+                <span v-if="paymentMethod === 'alipay'" class="payment-name alipay-text">
+                  <AlipayCircleOutlined class="payment-icon-small" />
+                  支付宝扫码支付
+                </span>
+                <span v-else class="payment-name wechat-text">
+                  <WechatOutlined class="payment-icon-small" />
+                  微信扫码支付
+                </span>
               </div>
-            </div>
-
-            <!-- 兑换码区域 -->
-            <div class="redeem-section">
-              <div class="redeem-header">
-                <GiftOutlined />
-                <span>兑换码激活</span>
+              <div class="qr-code-wrapper">
+                <canvas ref="qrCodeCanvas" width="180" height="180" />
               </div>
-              <p class="redeem-desc">拥有兑换码？立即激活VIP会员</p>
-              <a-input
-                v-model:value="redeemCode"
-                placeholder="请输入兑换码"
-                size="large"
-                class="redeem-input"
-              />
-              <a-button
-                type="primary"
-                @click="handleRedeem"
-                :loading="isRedeeming"
-                size="large"
-                block
-                class="redeem-button"
-              >
-                <GiftOutlined />
-                立即兑换
-              </a-button>
-              <div class="redeem-tips">
-                <InfoCircleOutlined />
-                <span>兑换码请联系管理员获取</span>
+              <p class="qr-tips">请使用{{ paymentMethod === 'alipay' ? '支付宝' : '微信' }}扫描二维码完成支付</p>
+              <div class="qr-footer">
+                <span class="amount">¥10.00</span>
+                <span class="countdown">有效期：{{ countdown }}</span>
               </div>
             </div>
           </div>
@@ -626,6 +626,12 @@ defineExpose({
   gap: 8px;
   font-size: 15px;
   font-weight: 500;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.payment-method-option span {
+  flex-shrink: 0;
 }
 
 /* 支付图标 */
@@ -650,6 +656,30 @@ defineExpose({
   font-size: 11px;
   margin-left: 4px;
   border: none;
+}
+
+.recommend-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  font-size: 10px;
+  border: none;
+  z-index: 10;
+  padding: 2px 6px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.payment-methods :deep(.ant-radio-button-wrapper) {
+  flex: 1;
+  height: auto;
+  padding: 16px 20px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: 2px solid #d9d9d9;
+  background: white;
+  position: relative;
+  overflow: visible;
 }
 
 /* 支付内容区域 */
