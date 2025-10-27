@@ -595,8 +595,44 @@ defineExpose({
   background: white;
 }
 
+/* 专门处理Ant Design Radio Button的左边框问题 */
+.payment-methods :deep(.ant-radio-button-wrapper:first-child) {
+  border-left: 2px solid #d9d9d9;
+}
+
+.payment-methods :deep(.ant-radio-button-wrapper:not(:first-child)) {
+  border-left: 2px solid #d9d9d9;
+}
+
+/* 专门处理Ant Design的默认样式冲突和粉色边框 */
+.payment-methods :deep(.ant-radio-button-wrapper::before) {
+  display: none !important;
+}
+
+/* 移除所有可能的伪元素和默认边框 */
+.payment-methods :deep(.ant-radio-button-wrapper)::after,
+.payment-methods :deep(.ant-radio-button-wrapper)::before {
+  display: none !important;
+}
+
+/* 专门处理可能存在的粉色边框 */
+.payment-methods :deep(.ant-radio-button-wrapper) {
+  border-left: 2px solid #d9d9d9 !important;
+}
+
+/* 选中状态的边框处理 */
+.payment-methods :deep(.ant-radio-button-wrapper-checked) {
+  border-color: #1890ff;
+  border-left: 2px solid #1890ff !important;
+}
+
+.payment-methods :deep(.ant-radio-button-wrapper-checked:not(:first-child)) {
+  border-left: 2px solid #1890ff !important;
+}
+
 .payment-methods :deep(.ant-radio-button-wrapper:hover) {
   border-color: #40a9ff;
+  border-left: 2px solid #40a9ff !important;
   color: rgba(0, 0, 0, 0.88);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
@@ -664,18 +700,6 @@ defineExpose({
   padding: 2px 6px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.payment-methods :deep(.ant-radio-button-wrapper) {
-  flex: 1;
-  height: auto;
-  padding: 16px 20px;
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  border: 2px solid #d9d9d9;
-  background: white;
-  position: relative;
-  overflow: visible;
 }
 
 /* 支付内容区域 */
