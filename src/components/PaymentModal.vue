@@ -3,26 +3,23 @@
     v-model:visible="visible"
     title="升级VIP会员"
     :footer="null"
-    width="900px"
+    width="800px"
     @cancel="handleCancel"
   >
     <div class="payment-modal-content">
-      <!-- VIP状态信息展示 -->
+      <!-- 简化的VIP状态信息展示 -->
       <div class="vip-status-section">
-        <h3>当前VIP状态</h3>
-        <div class="vip-status-card">
-          <div v-if="vipInfo.isVip" class="vip-active">
-            <a-tag color="gold" class="vip-tag">VIP会员</a-tag>
-            <div class="vip-info">
-              <p v-if="vipInfo.vipEndDate"><strong>到期时间：</strong>{{ formatDate(vipInfo.vipEndDate) }}</p>
-              <p v-if="vipInfo.remainingDays !== undefined" class="vip-remaining">
-                剩余天数：<span class="days-remaining">{{ vipInfo.remainingDays }}</span>天
-              </p>
-            </div>
-          </div>
-          <div v-else class="vip-inactive">
-            <a-tag color="default" class="vip-tag">普通用户</a-tag>
-            <p>升级VIP会员享受更多特权</p>
+        <div class="vip-status-content">
+          <div class="vip-info-wrapper">
+            <span class="status-label">当前状态：</span>
+            <a-tag v-if="vipInfo.isVip" color="gold" class="vip-tag">VIP会员</a-tag>
+            <a-tag v-else color="default" class="vip-tag">普通用户</a-tag>
+            <span v-if="vipInfo.isVip && vipInfo.remainingDays !== undefined" class="vip-expiry">
+              剩余{{ vipInfo.remainingDays }}天
+            </span>
+            <span v-else-if="!vipInfo.isVip" class="upgrade-prompt">
+              升级VIP享受更多特权
+            </span>
           </div>
         </div>
       </div>
@@ -118,7 +115,7 @@
                   </span>
                 </div>
                 <div class="qr-code-wrapper">
-                  <canvas ref="qrCodeCanvas" width="200" height="200" />
+                  <canvas ref="qrCodeCanvas" width="180" height="180" />
                 </div>
                 <p class="qr-tips">请使用{{ paymentMethod === 'alipay' ? '支付宝' : '微信' }}扫描二维码完成支付</p>
                 <div class="qr-footer">
@@ -395,69 +392,55 @@ defineExpose({
 
 <style scoped>
 .payment-modal-content {
-  padding: 20px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-}
-
-/* VIP状态区域 */
-.vip-status-section {
-  background: #f9f9f9;
-  padding: 16px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.vip-status-section h3 {
-  margin-bottom: 12px;
-  color: #333;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.vip-status-card {
-  background: white;
-  padding: 16px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.vip-active, .vip-inactive {
-  display: flex;
-  align-items: center;
   gap: 16px;
 }
 
-.vip-tag {
+/* VIP状态区域 - 简化布局 */
+.vip-status-section {
+  background: #f8f9fa;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+}
+
+.vip-status-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vip-info-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-label {
+  color: #666;
   font-size: 14px;
-  padding: 4px 12px;
+}
+
+.vip-tag {
+  font-size: 13px;
+  padding: 2px 8px;
   border-radius: 4px;
-  min-width: 80px;
+  min-width: 60px;
   text-align: center;
 }
 
-.vip-info {
-  flex: 1;
+.vip-expiry {
+  color: #52c41a;
+  font-size: 13px;
+  font-weight: 500;
 }
 
-.vip-info p {
-  margin: 4px 0;
-  color: #666;
-}
-
-.vip-info strong {
-  color: #333;
-}
-
-.vip-remaining {
-  margin-top: 8px !important;
-}
-
-.days-remaining {
+.upgrade-prompt {
   color: #ff4d4f;
-  font-weight: 600;
-  font-size: 16px;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 /* 主要内容区域 - 优化横向布局 */
