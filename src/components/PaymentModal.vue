@@ -3,59 +3,160 @@
     v-model:visible="visible"
     title="升级VIP会员"
     :footer="null"
-    width="600px"
+    width="900px"
     @cancel="handleCancel"
   >
     <div class="payment-modal-content">
-      <div class="user-benefits">
-        <h3>会员权益对比</h3>
-        <a-table :columns="columns" :data-source="data" :pagination="false" />
+      <!-- VIP状态信息展示 -->
+      <div class="vip-status-section">
+        <h3>当前VIP状态</h3>
+        <div class="vip-status-card">
+          <div v-if="vipInfo.isVip" class="vip-active">
+            <a-tag color="gold" class="vip-tag">VIP会员</a-tag>
+            <div class="vip-info">
+              <p v-if="vipInfo.vipEndDate"><strong>到期时间：</strong>{{ formatDate(vipInfo.vipEndDate) }}</p>
+              <p v-if="vipInfo.remainingDays !== undefined" class="vip-remaining">
+                剩余天数：<span class="days-remaining">{{ vipInfo.remainingDays }}</span>天
+              </p>
+            </div>
+          </div>
+          <div v-else class="vip-inactive">
+            <a-tag color="default" class="vip-tag">普通用户</a-tag>
+            <p>升级VIP会员享受更多特权</p>
+          </div>
+        </div>
       </div>
 
-      <div class="payment-section">
-        <h3>支付方式</h3>
-        <div class="payment-methods">
-          <a-radio-group v-model:value="paymentMethod" button-style="solid" size="large" @change="handlePaymentMethodChange">
-            <a-radio-button value="alipay">
-              <div class="payment-method-option">
-                <AlipayCircleOutlined class="payment-icon alipay-icon" />
-                <span>支付宝</span>
-                <a-tag color="orange" class="recommend-tag">推荐</a-tag>
+      <!-- 优化后的主内容区域 -->
+      <div class="main-content">
+        <!-- 左侧：会员权益对比 -->
+        <div class="benefits-section">
+          <h3>会员权益对比</h3>
+          <div class="benefits-cards">
+            <div class="benefit-card normal">
+              <div class="benefit-header">
+                <a-tag color="default">普通用户</a-tag>
+                <span class="benefit-price">免费</span>
               </div>
-            </a-radio-button>
-            <a-radio-button value="wechat">
-              <div class="payment-method-option">
-                <WechatOutlined class="payment-icon wechat-icon" />
-                <span>微信支付</span>
+              <div class="benefit-content">
+                <div class="benefit-item">
+                  <DownloadOutlined />
+                  <span>每日下载 5 次</span>
+                </div>
+                <div class="benefit-item">
+                  <FileSearchOutlined />
+                  <span>基础搜索功能</span>
+                </div>
+                <div class="benefit-item">
+                  <PictureOutlined />
+                  <span>标准图片上传</span>
+                </div>
               </div>
-            </a-radio-button>
-          </a-radio-group>
+            </div>
+            <div class="benefit-card vip">
+              <div class="benefit-header">
+                <a-tag color="gold">VIP会员</a-tag>
+                <span class="benefit-price">10元/月</span>
+              </div>
+              <div class="benefit-content">
+                <div class="benefit-item">
+                  <DownloadOutlined />
+                  <span>每日下载 20 次</span>
+                </div>
+                <div class="benefit-item">
+                  <FileSearchOutlined />
+                  <span>高级搜索功能</span>
+                </div>
+                <div class="benefit-item">
+                  <PictureOutlined />
+                  <span>高清图片上传</span>
+                </div>
+                <div class="benefit-highlight">
+                  <CrownOutlined />
+                  <span>专享特权</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="qr-code-container">
-          <div class="qr-code">
-            <div class="qr-code-header">
-              <span v-if="paymentMethod === 'alipay'" class="payment-name alipay-text">
-                <AlipayCircleOutlined class="payment-icon-small" />
-                支付宝扫码支付
-              </span>
-              <span v-else class="payment-name wechat-text">
-                <WechatOutlined class="payment-icon-small" />
-                微信扫码支付
-              </span>
-            </div>
-            <div class="qr-code-wrapper">
-              <canvas ref="qrCodeCanvas" width="200" height="200" />
-            </div>
-            <p class="qr-tips">请使用{{ paymentMethod === 'alipay' ? '支付宝' : '微信' }}扫描二维码完成支付</p>
-            <p>二维码有效期：<span class="countdown">{{ countdown }}</span></p>
+        <!-- 右侧：支付区域 -->
+        <div class="payment-section">
+          <!-- 支付方式选择 -->
+          <div class="payment-methods">
+            <h3>选择支付方式</h3>
+            <a-radio-group v-model:value="paymentMethod" button-style="solid" @change="handlePaymentMethodChange">
+              <a-radio-button value="alipay">
+                <div class="payment-method-option">
+                  <AlipayCircleOutlined class="payment-icon alipay-icon" />
+                  <span>支付宝</span>
+                  <a-tag color="orange" class="recommend-tag">推荐</a-tag>
+                </div>
+              </a-radio-button>
+              <a-radio-button value="wechat">
+                <div class="payment-method-option">
+                  <WechatOutlined class="payment-icon wechat-icon" />
+                  <span>微信支付</span>
+                </div>
+              </a-radio-button>
+            </a-radio-group>
           </div>
-          <div class="redeem-section">
-            <div class="redeem-header">
-              <span>兑换码</span>
+
+          <!-- 支付内容区域 -->
+          <div class="payment-content">
+            <!-- 二维码区域 -->
+            <div class="qr-code-section">
+              <div class="qr-code">
+                <div class="qr-code-header">
+                  <span v-if="paymentMethod === 'alipay'" class="payment-name alipay-text">
+                    <AlipayCircleOutlined class="payment-icon-small" />
+                    支付宝扫码支付
+                  </span>
+                  <span v-else class="payment-name wechat-text">
+                    <WechatOutlined class="payment-icon-small" />
+                    微信扫码支付
+                  </span>
+                </div>
+                <div class="qr-code-wrapper">
+                  <canvas ref="qrCodeCanvas" width="200" height="200" />
+                </div>
+                <p class="qr-tips">请使用{{ paymentMethod === 'alipay' ? '支付宝' : '微信' }}扫描二维码完成支付</p>
+                <div class="qr-footer">
+                  <span class="amount">¥10.00</span>
+                  <span class="countdown">有效期：{{ countdown }}</span>
+                </div>
+              </div>
             </div>
-            <a-input v-model:value="redeemCode" placeholder="请输入兑换码" size="large" />
-            <a-button type="primary" @click="handleRedeem" :loading="isRedeeming" size="large" block>立即兑换</a-button>
+
+            <!-- 兑换码区域 -->
+            <div class="redeem-section">
+              <div class="redeem-header">
+                <GiftOutlined />
+                <span>兑换码激活</span>
+              </div>
+              <p class="redeem-desc">拥有兑换码？立即激活VIP会员</p>
+              <a-input
+                v-model:value="redeemCode"
+                placeholder="请输入兑换码"
+                size="large"
+                class="redeem-input"
+              />
+              <a-button
+                type="primary"
+                @click="handleRedeem"
+                :loading="isRedeeming"
+                size="large"
+                block
+                class="redeem-button"
+              >
+                <GiftOutlined />
+                立即兑换
+              </a-button>
+              <div class="redeem-tips">
+                <InfoCircleOutlined />
+                <span>兑换码请联系管理员获取</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -66,12 +167,15 @@
 <script setup lang="ts">
 import { ref, onMounted ,nextTick } from 'vue';
 import QRCode from 'qrcode';
-import { redeemVipUsingPost } from '@/api/vipController';
+import { redeemVipUsingPost, checkVipStatusUsingGet } from '@/api/vipController';
 import { useLoginUserStore } from '@/stores/useLoginUserStore';
 import { message } from 'ant-design-vue';
-import { WechatOutlined, AlipayCircleOutlined } from '@ant-design/icons-vue';
+import { WechatOutlined, AlipayCircleOutlined, DownloadOutlined, CrownOutlined, GiftOutlined, FileSearchOutlined, PictureOutlined, InfoCircleOutlined } from '@ant-design/icons-vue';
 
 const loginUserStore = useLoginUserStore();
+
+// VIP状态信息
+const vipInfo = ref<API.VIPInfoVO>({});
 
 const visible = ref(false);
 const countdown = ref<string>('05:00');
@@ -148,10 +252,30 @@ const handleCancel = () => {
 
 const qrCodeCanvas = ref<HTMLCanvasElement | null>(null);
 
-const openModal = () => {
+// 获取VIP状态信息
+const fetchVipStatus = async () => {
+  const userId = loginUserStore.loginUser?.id;
+  if (!userId) {
+    console.warn('用户未登录，无法获取VIP信息');
+    return;
+  }
+
+  try {
+    const res = await checkVipStatusUsingGet({ userId });
+    if (res.data.code === 0 && res.data.data) {
+      vipInfo.value = res.data.data;
+    }
+  } catch (error) {
+    console.error('获取VIP状态失败:', error);
+  }
+};
+
+const openModal = async () => {
   visible.value = true;
   countdown.value = '05:00';
   startCountdown();
+  // 获取VIP信息
+  await fetchVipStatus();
   nextTick(() => {
     generateQRCode();
   });
@@ -219,6 +343,19 @@ const handlePaymentMethodChange = () => {
 //   }
 // });
 
+// 格式化日期
+const formatDate = (dateString: string) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
 const handleRedeem = async () => {
   if (redeemCode.value.trim() === '') {
     message.warning('请输入兑换码');
@@ -261,40 +398,206 @@ defineExpose({
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
-.user-benefits {
+/* VIP状态区域 */
+.vip-status-section {
   background: #f9f9f9;
   padding: 16px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.user-benefits h3 {
+.vip-status-section h3 {
   margin-bottom: 12px;
   color: #333;
   font-size: 16px;
   font-weight: 600;
 }
 
-.payment-section {
-  background: #f9f9f9;
+.vip-status-card {
+  background: white;
   padding: 16px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.vip-active, .vip-inactive {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.vip-tag {
+  font-size: 14px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  min-width: 80px;
+  text-align: center;
+}
+
+.vip-info {
+  flex: 1;
+}
+
+.vip-info p {
+  margin: 4px 0;
+  color: #666;
+}
+
+.vip-info strong {
+  color: #333;
+}
+
+.vip-remaining {
+  margin-top: 8px !important;
+}
+
+.days-remaining {
+  color: #ff4d4f;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+/* 主要内容区域 - 优化横向布局 */
+.main-content {
+  display: flex;
+  gap: 24px;
+  flex: 1;
+}
+
+/* 会员权益区域 */
+.benefits-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  flex: 1;
+  min-width: 0;
+}
+
+.benefits-section h3 {
+  margin-bottom: 20px;
+  color: #1a1a1a;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.benefits-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.benefit-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.benefit-card.normal {
+  border-color: #e8e8e8;
+}
+
+.benefit-card.vip {
+  border-color: #ffd700;
+  background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+  position: relative;
+}
+
+.benefit-card.vip::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #ffd700, #ffed4e);
+  border-radius: 12px 12px 0 0;
+}
+
+.benefit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.benefit-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+}
+
+.benefit-card.vip .benefit-price {
+  color: #d48806;
+}
+
+.benefit-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+.benefit-item :deep(.anticon) {
+  font-size: 16px;
+  color: #1890ff;
+}
+
+.benefit-highlight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #fff7e6;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #d48806;
+}
+
+.benefit-highlight :deep(.anticon) {
+  font-size: 18px;
+  color: #d48806;
+}
+
+/* 支付区域 */
+.payment-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .payment-section h3 {
-  margin-bottom: 12px;
-  color: #333;
-  font-size: 16px;
+  margin-bottom: 20px;
+  color: #1a1a1a;
+  font-size: 18px;
   font-weight: 600;
+  text-align: center;
 }
 
 /* 支付方式选择器 */
 .payment-methods {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .payment-methods :deep(.ant-radio-group) {
@@ -306,26 +609,30 @@ defineExpose({
 .payment-methods :deep(.ant-radio-button-wrapper) {
   flex: 1;
   height: auto;
-  padding: 12px 20px;
-  border-radius: 8px;
-  transition: all 0.3s;
-  border: 1px solid #d9d9d9;
+  padding: 16px 20px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: 2px solid #d9d9d9;
+  background: white;
 }
 
 .payment-methods :deep(.ant-radio-button-wrapper:hover) {
-  border-color: #1890ff;
+  border-color: #40a9ff;
   color: rgba(0, 0, 0, 0.88);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
 }
 
 .payment-methods :deep(.ant-radio-button-wrapper-checked) {
   border-color: #1890ff;
-  background: #e6f7ff;
+  background: linear-gradient(135deg, #e6f7ff 0%, #ffffff 100%);
   color: rgba(0, 0, 0, 0.88);
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
 }
 
 .payment-methods :deep(.ant-radio-button-wrapper-checked:hover) {
   border-color: #1890ff;
-  background: #e6f7ff;
+  background: linear-gradient(135deg, #e6f7ff 0%, #ffffff 100%);
   color: rgba(0, 0, 0, 0.88);
 }
 
@@ -340,7 +647,7 @@ defineExpose({
 
 /* 支付图标 */
 .payment-icon {
-  font-size: 20px;
+  font-size: 22px;
 }
 
 .payment-icon-small {
@@ -357,33 +664,36 @@ defineExpose({
 }
 
 .recommend-tag {
-  font-size: 12px;
+  font-size: 11px;
   margin-left: 4px;
   border: none;
 }
 
-/* 二维码容器 */
-.qr-code-container {
+/* 支付内容区域 */
+.payment-content {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 30px;
-  margin-top: 16px;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 二维码区域 */
+.qr-code-section {
+  flex: 1;
 }
 
 .qr-code {
-  flex: 1;
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  text-align: center;
 }
 
 .qr-code-header {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   font-size: 16px;
   font-weight: 600;
 }
@@ -391,6 +701,8 @@ defineExpose({
 .payment-name {
   display: flex;
   align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .alipay-text {
@@ -402,74 +714,187 @@ defineExpose({
 }
 
 .qr-code-wrapper {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 8px;
 }
 
 .qr-code canvas {
-  width: 200px;
-  height: 200px;
-  border: 2px solid #f0f0f0;
+  width: 180px;
+  height: 180px;
   border-radius: 8px;
-  padding: 10px;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background: white;
 }
 
 .qr-tips {
   color: #666;
   font-size: 13px;
-  margin: 8px 0 4px 0;
+  margin: 8px 0;
+}
+
+.qr-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.amount {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ff4d4f;
 }
 
 .countdown {
-  color: #ff4d4f;
-  font-weight: 600;
   font-size: 14px;
+  font-weight: 500;
+  color: #666;
 }
 
 /* 兑换码区域 */
 .redeem-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
   background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .redeem-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   font-size: 16px;
   font-weight: 600;
   color: #333;
-  text-align: center;
-  padding-bottom: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
   border-bottom: 1px solid #f0f0f0;
 }
 
-.redeem-section :deep(.ant-input) {
-  border-radius: 6px;
-  height: 44px;
-  font-size: 14px;
+.redeem-header :deep(.anticon) {
+  color: #52c41a;
+  font-size: 18px;
 }
 
-.redeem-section :deep(.ant-btn) {
-  height: 44px;
-  border-radius: 6px;
+.redeem-desc {
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.redeem-input {
+  margin-bottom: 16px;
+}
+
+.redeem-input :deep(.ant-input) {
+  border-radius: 8px;
+  height: 48px;
+  font-size: 14px;
+  border: 2px solid #d9d9d9;
+  transition: all 0.3s ease;
+}
+
+.redeem-input :deep(.ant-input:focus) {
+  border-color: #40a9ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+}
+
+.redeem-button {
+  height: 48px;
+  border-radius: 8px;
   font-weight: 600;
   font-size: 15px;
-  margin-top: auto;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  border: none;
+  transition: all 0.3s ease;
 }
 
-/* 响应式 */
+.redeem-button:hover {
+  background: linear-gradient(135deg, #73d13d 0%, #52c41a 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
+}
+
+.redeem-tips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #999;
+  text-align: center;
+}
+
+.redeem-tips :deep(.anticon) {
+  font-size: 14px;
+  color: #999;
+}
+
+/* 响应式设计 */
 @media (max-width: 768px) {
-  .qr-code-container {
+  .main-content {
     flex-direction: column;
+    gap: 20px;
+  }
+
+  .benefits-section, .payment-section {
+    padding: 16px;
+  }
+
+  .benefits-cards {
+    gap: 12px;
+  }
+
+  .benefit-card {
+    padding: 16px;
   }
 
   .payment-methods :deep(.ant-radio-group) {
     flex-direction: column;
+    gap: 8px;
+  }
+
+  .payment-methods :deep(.ant-radio-button-wrapper) {
+    padding: 12px 16px;
+  }
+
+  .qr-code {
+    padding: 20px;
+  }
+
+  .qr-code canvas {
+    width: 160px;
+    height: 160px;
+  }
+
+  .redeem-section {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-modal-content {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .vip-status-section {
+    padding: 12px;
+  }
+
+  .benefits-section, .payment-section {
+    padding: 12px;
+  }
+
+  .qr-code canvas {
+    width: 140px;
+    height: 140px;
   }
 }
 </style>
