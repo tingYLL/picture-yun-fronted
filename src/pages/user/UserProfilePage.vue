@@ -16,6 +16,10 @@
                 <template #icon><LockOutlined /></template>
                 修改密码
               </a-button>
+              <a-button type="text" @click="copyUserId" size="small">
+                <template #icon><CopyOutlined /></template>
+                复制UID
+              </a-button>
             </div>
           </div>
         </template>
@@ -327,7 +331,8 @@ import {
   CrownOutlined,
   CrownTwoTone,
   CheckCircleOutlined,
-  GiftOutlined
+  GiftOutlined,
+  CopyOutlined
 } from '@ant-design/icons-vue'
 import {useRouter} from "vue-router";
 const router = useRouter();
@@ -458,6 +463,24 @@ const editPasswordSubmit = async () => {
   } catch (error) {
     message.error('操作失败，请重试');
     console.error('修改密码错误:', error);
+  }
+}
+
+/**
+ * 复制用户ID
+ */
+const copyUserId = async () => {
+  const userId = userInfo.value.id
+  if (!userId) {
+    message.error('用户ID不存在')
+    return
+  }
+  try {
+    await navigator.clipboard.writeText(String(userId))
+    message.success('UID复制成功!')
+  } catch (error) {
+    message.error('复制失败，请重试')
+    console.error('复制UID错误:', error)
   }
 }
 

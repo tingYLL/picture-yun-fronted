@@ -15,8 +15,8 @@
     <div style="margin-bottom: 16px" />
     <!-- 添加成员表单 -->
     <a-form layout="inline" :model="formData" @finish="handleSubmit">
-      <a-form-item label="用户 id" name="userId">
-        <a-input v-model:value="formData.userId" placeholder="请输入用户 id" allow-clear />
+      <a-form-item label="用户UID" name="userId">
+        <a-input v-model:value="formData.userId" placeholder="请输入UID" allow-clear />
       </a-form-item>
       <a-form-item>
         <a-button type="primary" html-type="submit">添加用户</a-button>
@@ -47,7 +47,7 @@
         </template>
         <template v-else-if="column.key === 'action'">
           <a-space wrap>
-            <a-button type="link" danger @click="doDelete(record.id)">删除</a-button>
+            <a-button type="link" danger @click="doDelete(record.id)">移除</a-button>
           </a-space>
         </template>
       </template>

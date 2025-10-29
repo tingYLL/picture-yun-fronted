@@ -5,7 +5,7 @@
         <div style="display: flex; align-items: center;">
           <router-link to="/">
             <div class="title-bar">
-              <div class="title">啵哩啵哩</div>
+              <div class="title">哔哔哩哩</div>
             </div>
           </router-link>
           <a-menu

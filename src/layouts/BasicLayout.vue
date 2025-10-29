@@ -14,7 +14,7 @@
         </a-layout-content>
       </a-layout>
 <!--      <a-layout-footer class="footer">-->
-<!--        <a href="#" target="_blank">啵哩啵哩 by 蒙古上单</a>-->
+<!--        <a href="#" target="_blank">哔哔哩哩 by 蒙古上单</a>-->
 <!--      </a-layout-footer>-->
     </a-layout>
   </div>

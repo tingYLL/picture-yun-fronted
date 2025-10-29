@@ -1,6 +1,6 @@
 <template>
   <div id="userRegisterPage">
-    <h2 class="title">啵哩啵哩 - 用户注册</h2>
+    <h2 class="title">哔哔哩哩 - 用户注册</h2>
     <div class="desc">免费在线图片素材网站</div>
     <a-form :model="formState" name="basic" autocomplete="off" @finish="handleSubmit">
       <a-form-item name="userAccount" :rules="[{ required: true, message: '请输入账号' }]">
