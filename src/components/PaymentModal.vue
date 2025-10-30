@@ -143,6 +143,16 @@
               </div>
               <div class="qr-code-wrapper">
                 <canvas ref="qrCodeCanvas" width="180" height="180" />
+                <!-- 过期遮罩 -->
+                <div v-if="isExpired" class="qr-expired-overlay">
+                  <div class="expired-content">
+                    <CloseCircleOutlined class="expired-icon" />
+                    <span class="expired-text">二维码已失效</span>
+                    <a-button type="primary" size="small" @click="refreshQRCode" class="refresh-btn">
+                      刷新二维码
+                    </a-button>
+                  </div>
+                </div>
               </div>
               <p class="qr-tips">请使用{{ paymentMethod === 'alipay' ? '支付宝' : '微信' }}扫描二维码完成支付</p>
               <div class="qr-footer">
@@ -163,7 +173,7 @@ import QRCode from 'qrcode';
 import { redeemVipUsingPost, checkVipStatusUsingGet } from '@/api/vipController';
 import { useLoginUserStore } from '@/stores/useLoginUserStore';
 import { message } from 'ant-design-vue';
-import { WechatOutlined, AlipayCircleOutlined, DownloadOutlined, CrownOutlined, GiftOutlined, FileSearchOutlined, PictureOutlined, InfoCircleOutlined } from '@ant-design/icons-vue';
+import { WechatOutlined, AlipayCircleOutlined, DownloadOutlined, CrownOutlined, GiftOutlined, FileSearchOutlined, PictureOutlined, InfoCircleOutlined, CloseCircleOutlined } from '@ant-design/icons-vue';
 
 const loginUserStore = useLoginUserStore();
 
@@ -174,6 +184,7 @@ const visible = ref(false);
 const countdown = ref<string>('05:00');
 const redeemCode = ref<string>('');
 const isRedeeming = ref(false);
+const isExpired = ref(false); // 二维码是否过期
 const paymentMethod = ref<'alipay' | 'wechat'>('alipay'); // 默认支付宝
 let countdownInterval: number | null = null;
 
@@ -186,6 +197,7 @@ const startCountdown = () => {
       if (minutes === 0) {
         clearInterval(countdownInterval as number);
         countdown.value = '已过期';
+        isExpired.value = true; // 设置过期状态
         return;
       }
       minutes--;
@@ -266,6 +278,7 @@ const fetchVipStatus = async () => {
 const openModal = async () => {
   visible.value = true;
   countdown.value = '05:00';
+  isExpired.value = false; // 重置过期状态
   startCountdown();
   // 获取VIP信息
   await fetchVipStatus();
@@ -305,9 +318,10 @@ const generateQRCode = () => {
 
 // 处理支付方式切换
 const handlePaymentMethodChange = () => {
-  // 重置倒计时
+  // 重置倒计时和过期状态
   stopCountdown();
   countdown.value = '05:00';
+  isExpired.value = false; // 重置过期状态
   startCountdown();
 
   // 重新生成二维码
@@ -316,6 +330,21 @@ const handlePaymentMethodChange = () => {
   });
 
   // message.info(`已切换至${paymentMethod.value === 'alipay' ? '支付宝' : '微信'}支付`);
+};
+
+// 刷新二维码
+const refreshQRCode = () => {
+  // 重置过期状态
+  isExpired.value = false;
+  // 重置倒计时
+  stopCountdown();
+  countdown.value = '05:00';
+  startCountdown();
+  // 重新生成二维码
+  nextTick(() => {
+    generateQRCode();
+  });
+  message.success('二维码已刷新');
 };
 
 //不要用onMounted，因为onMounted在组件挂载后执行，而这里需要的是在Modal打开后执行
@@ -751,6 +780,77 @@ defineExpose({
   padding: 12px;
   background: #fafafa;
   border-radius: 8px;
+  position: relative;
+}
+
+/* 二维码过期遮罩层 */
+.qr-expired-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.expired-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+}
+
+.expired-icon {
+  font-size: 48px;
+  color: #ff4d4f;
+  animation: scaleIn 0.3s ease;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.expired-text {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.refresh-btn {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+}
+
+.refresh-btn:hover {
+  background: linear-gradient(135deg, #40a9ff 0%, #1890ff 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
 }
 
 .qr-code canvas {
