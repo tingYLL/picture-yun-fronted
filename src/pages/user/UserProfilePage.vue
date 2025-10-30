@@ -35,13 +35,13 @@
               class="avatar-uploader"
             >
               <div class="avatar-wrapper">
-                <a-badge :count="userInfo.vipNumber ? 'VIP' : null" :color="userInfo.vipNumber ? '#722ed1' : ''">
+<!--                <a-badge :count="userInfo.isVip ? 'VIP' : null" :color="userInfo.isVip ? '#722ed1' : ''">-->
                   <a-avatar :size="120" :src="userAvatar" class="profile-avatar">
                     <template v-if="!userAvatar" #icon>
                       <UserOutlined />
                     </template>
                   </a-avatar>
-                </a-badge>
+<!--                </a-badge>-->
                 <div class="upload-text">
                   <span>点击上传头像</span>
                 </div>
@@ -82,11 +82,11 @@
             </div>
 
             <!-- 个人简介 -->
-            <div class="bio-section" v-if="userInfo.userProfile">
+            <div class="bio-section">
               <a-divider class="divider" />
               <div class="bio-content">
                 <span class="info-label"><ProfileOutlined /> 个人简介</span>
-                <p>{{ userInfo.userProfile }}</p>
+                <p>{{ userInfo.userProfile || '这个人很懒什么都没有留下' }}</p>
               </div>
             </div>
 
@@ -156,7 +156,10 @@
           </a-col>
         </a-row>
 
-        <a-form-item label="邮箱" name="userEmail">
+        <a-form-item
+          label="邮箱"
+          name="userEmail"
+        >
           <a-input
             v-model:value="editUserInfoForm.userEmail"
             placeholder="请输入邮箱"
