@@ -123,7 +123,7 @@ import {
   RedoOutlined,
   EyeOutlined,
 } from '@ant-design/icons-vue'
-import { h, onMounted, reactive, ref } from 'vue'
+import { computed, h, onMounted, reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
 import { useRouter } from 'vue-router'
@@ -147,8 +147,8 @@ const searchParams = reactive<API.PictureQueryRequest>({ ...INITIAL_SEARCH_PARAM
 // 日期范围
 const dateRange = ref<[dayjs.Dayjs, dayjs.Dayjs]>([])
 
-// 日期预设
-const rangePresets = ref([
+// 日期预设（使用 computed 确保每次都获取最新时间）
+const rangePresets = computed(() => [
   { label: '今天', value: [dayjs(), dayjs()] },
   { label: '昨天', value: [dayjs().add(-1, 'd'), dayjs().add(-1, 'd')] },
   { label: '过去 7 天', value: [dayjs().add(-7, 'd'), dayjs()] },
@@ -163,8 +163,9 @@ const dataLoading = ref(false)
 // 日期范围变化
 const onRangeChange = (dates: any[], dateStrings: string[]) => {
   if (dates?.length >= 2) {
-    searchParams.startEditTime = dates[0].toDate()
-    searchParams.endEditTime = dates[1].toDate()
+    // 设置为当天 00:00:00 和 23:59:59（本地时区）
+    searchParams.startEditTime = dates[0].startOf('day').format()
+    searchParams.endEditTime = dates[1].endOf('day').format()
   } else {
     searchParams.startEditTime = undefined
     searchParams.endEditTime = undefined

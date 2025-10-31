@@ -190,7 +190,7 @@ import {
   ShareAltOutlined,
   SyncOutlined,
 } from '@ant-design/icons-vue'
-import { h, onMounted, reactive, ref } from 'vue'
+import { computed, h, onMounted, reactive, ref } from 'vue'
 import {
   PIC_FORMAT_STATUS_OPTIONS,
   PIC_REVIEW_STATUS_MAP,
@@ -264,9 +264,9 @@ const pictureSearchParams = reactive<API.PictureQueryRequest>({ ...INITIAL_PICTU
  */
 const dateRange = ref<[Dayjs, Dayjs]>([])
 /**
- * 日期搜索组件预设变量
+ * 日期搜索组件预设变量（使用 computed 确保每次都获取最新时间）
  */
-const rangePresets = ref([
+const rangePresets = computed(() => [
   { label: '今天', value: [dayjs(), dayjs()] },
   { label: '昨天', value: [dayjs().add(-1, 'd'), dayjs().add(-1, 'd')] },
   { label: '过去 7 天', value: [dayjs().add(-7, 'd'), dayjs()] },
@@ -280,16 +280,10 @@ const rangePresets = ref([
  * @param dateStrings
  */
 const onRangeChange = (dates: any[], dateStrings: string[]) => {
-  // if (dates.length < 2) {
-  //   pictureSearchParams.startCreateTime = undefined
-  //   pictureSearchParams.endCreateTime = undefined
-  // } else {
-  //   pictureSearchParams.startEditTime = dayjs(dates[0]).format('YYYY-MM-DD') + ' 00:00:00'
-  //   pictureSearchParams.endEditTime = dayjs(dates[1]).format('YYYY-MM-DD') + ' 23:59:59'
-  // }
   if (dates?.length >= 2) {
-    pictureSearchParams.startEditTime = dates[0].toDate()
-    pictureSearchParams.endEditTime = dates[1].toDate()
+    // 设置为当天 00:00:00 和 23:59:59（本地时区）
+    pictureSearchParams.startEditTime = dates[0].startOf('day').format()
+    pictureSearchParams.endEditTime = dates[1].endOf('day').format()
   } else {
     pictureSearchParams.startEditTime = undefined
     pictureSearchParams.endEditTime = undefined
