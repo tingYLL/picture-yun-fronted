@@ -27,7 +27,7 @@
             </a-flex>
           </template>
           <div class="image-detail-content">
-            <a-image :src="picture.url" style="max-height: 600px;object-fit: contain"/>
+            <a-image :src="picture.url"/>
           </div>
           <template #actions>
             <div>
@@ -449,26 +449,24 @@ const goBack = () => {
   justify-content: center;
   align-items: center;
   width: 100%;
-  min-height: 100px; /* 最小高度 */
-  max-height: 80vh; /* 最大高度为视口的80% */
+  height: 600px; /* 固定高度 */
   overflow: hidden; /* 确保不会溢出 */
 }
-/* 图片样式：完全自适应 */
+
+/* 图片样式：固定容器尺寸内居中显示 */
 .image-detail-content :deep(.ant-image) {
-  display: block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   height: 100%;
 }
 
 .image-detail-content :deep(.ant-image .ant-image-img) {
-  display: block;
-  width: auto;
-  height: auto;
   max-width: 100%;
-  max-height: 70vh; /* 与容器一致 */
-  object-fit: scale-down; /* 关键修改：使用scale-down */
-  margin: 0 auto;
-  transition: transform 0.3s ease;
+  max-height: 100%;
+  object-fit: contain; /* 保持图片比例，完整显示在容器内 */
+  margin: auto;
 }
 </style>
 
