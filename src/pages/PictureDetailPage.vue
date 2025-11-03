@@ -126,6 +126,33 @@
         </a-card>
       </a-col>
     </a-row>
+
+    <!-- 评论区域 -->
+    <a-row :gutter="[16, 16]" style="margin-top: 24px">
+      <a-col :span="24">
+        <a-card title="评论" :loading="commentsLoading">
+          <!-- 评论输入框 -->
+          <CommentInput
+            :pictureId="picture.id!"
+            :spaceId="picture.spaceId"
+            :replyTo="replyToComment"
+            @success="handleCommentSuccess"
+            @cancel="handleCancelReply"
+          />
+
+          <a-divider />
+
+          <!-- 评论列表 -->
+          <CommentList
+            :comments="comments"
+            :pictureId="picture.id!"
+            @reply="handleReply"
+            @refresh="fetchComments"
+          />
+        </a-card>
+      </a-col>
+    </a-row>
+
     <ShareModal ref="shareModalRef" :link="shareLink" />
     <PaymentModal ref="paymentModalRef" />
   </div>
@@ -136,7 +163,10 @@ import {deletePictureUsingPost, getPictureVoByIdUsingGet,
   pictureLikeOrCollectUsingPost,pictureShareUsingPost,
   } from "@/api/pictureController";
 import {downloadFileUsingPost} from "@/api/downloadController.ts"
+import {getCommentTreeUsingGet} from "@/api/commentController"
 import PaymentModal from '@/components/PaymentModal.vue'
+import CommentInput from '@/components/CommentInput.vue'
+import CommentList from '@/components/CommentList.vue'
 import {useRoute, useRouter} from "vue-router";
 import { message, Modal } from 'ant-design-vue'
 import {downloadImage, formatSize,toHexColor} from '@/utils/index'
@@ -172,7 +202,7 @@ const searchParams = reactive<API.PictureQueryRequest>({
 })
 
 //获取图片详情
-const  fetchPictureDetail = async ()=>{
+const   fetchPictureDetail = async ()=>{
 
   try {
     const res = await getPictureVoByIdUsingGet({
@@ -292,10 +322,6 @@ const doDownload = async () => {
     paymentModalRef.value.visible = true
   }
 }
-
-onMounted(()=>{
-  fetchPictureDetail()
-})
 
 /**
  * 查看数量
@@ -420,6 +446,65 @@ const doSharePicture = async (picture: API.PictureVO, e: Event) => {
     message.error(res.data.message)
   }
 }
+
+// ----- 评论相关 ----
+// 评论列表
+const comments = ref<API.CommentVO[]>([])
+// 评论加载状态
+const commentsLoading = ref(false)
+// 当前回复的评论
+const replyToComment = ref<API.CommentVO | undefined>(undefined)
+
+// 获取评论列表
+const fetchComments = async () => {
+  if (!picture.value.id) return
+
+  commentsLoading.value = true
+  try {
+    const res = await getCommentTreeUsingGet({
+      pictureId: picture.value.id as number,
+    })
+
+    if (res.data.code === 0 && res.data.data) {
+      comments.value = res.data.data
+    } else {
+      message.error('获取评论失败：' + res.data.message)
+    }
+  } catch (error: any) {
+    message.error('获取评论失败：' + error.message)
+  } finally {
+    commentsLoading.value = false
+  }
+}
+
+// 处理回复
+const handleReply = (comment: API.CommentVO) => {
+  replyToComment.value = comment
+  // 滚动到评论输入框
+  setTimeout(() => {
+    const commentCard = document.querySelector('.comment-input')
+    if (commentCard) {
+      commentCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+  }, 100)
+}
+
+// 取消回复
+const handleCancelReply = () => {
+  replyToComment.value = undefined
+}
+
+// 评论成功后的处理
+const handleCommentSuccess = () => {
+  replyToComment.value = undefined
+  fetchComments()
+}
+
+// 页面加载时获取评论
+onMounted(async () => {
+  await fetchPictureDetail()
+  fetchComments()
+})
 
 // ----- 分享操作 ----
 const shareModalRef = ref()

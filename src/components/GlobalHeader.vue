@@ -20,6 +20,20 @@
       <a-col flex="auto">
         <div class="user-login-status">
           <div v-if="loginUserStore.loginUser.id">
+            <!-- 消息通知图标 -->
+            <a-badge :count="unreadCount" :overflow-count="99" class="notification-badge">
+              <a-button
+                type="text"
+                shape="circle"
+                size="large"
+                @click="goToNotificationCenter"
+              >
+                <template #icon>
+                  <BellOutlined :style="{ fontSize: '20px' }" />
+                </template>
+              </a-button>
+            </a-badge>
+
             <a-dropdown @visibleChange="handleDropdownVisibleChange">
               <a-space :size="8">
                 <a-badge :dot="loginUserStore.loginUser.isVip" :offset="[-8, 32]">
@@ -89,14 +103,16 @@
   </div>
 </template>
 <script lang="ts" setup>
-import {computed, h, ref, onMounted} from 'vue';
+import {computed, h, ref, onMounted, onBeforeUnmount, watch} from 'vue';
 import {HomeOutlined,LogoutOutlined,UserOutlined,CrownOutlined,StarOutlined,
-  CloudDownloadOutlined,RightOutlined,SketchOutlined} from '@ant-design/icons-vue';
+  CloudDownloadOutlined,RightOutlined,SketchOutlined,BellOutlined} from '@ant-design/icons-vue';
 import {MenuProps, message} from 'ant-design-vue';
 import {useRouter} from "vue-router";
 import {useLoginUserStore} from "@/stores/useLoginUserStore";
 import {userLogoutUsingPost} from "@/api/userController";
 import {getRemainingDownloadsUsingGet} from "@/api/downloadController";
+import {getUnreadCountUsingGet} from "@/api/commentNotificationController";
+import {commentSseService} from "@/utils/commentSse";
 import PictureReleaseListPage from '@/pages/PictureReleaseListPage.vue'
 import PaymentModal from './PaymentModal.vue'
 
@@ -104,6 +120,9 @@ const loginUserStore = useLoginUserStore()
 
 // 剩余下载次数
 const remainingDownloads = ref<number>(0)
+
+// 未读消息数
+const unreadCount = ref<number>(0)
 
 // 获取剩余下载次数
 const fetchRemainingDownloads = async () => {
@@ -115,6 +134,23 @@ const fetchRemainingDownloads = async () => {
   } catch (error) {
     console.error('获取剩余下载次数失败:', error)
   }
+}
+
+// 获取未读消息数
+const fetchUnreadCount = async () => {
+  try {
+    const res = await getUnreadCountUsingGet()
+    if (res.data.code === 0 && res.data.data !== undefined) {
+      unreadCount.value = res.data.data
+    }
+  } catch (error) {
+    console.error('获取未读消息数失败:', error)
+  }
+}
+
+// 跳转到通知中心
+const goToNotificationCenter = () => {
+  router.push('/notification/center')
 }
 
 // PaymentModal ref
@@ -133,10 +169,71 @@ const handleDropdownVisibleChange = (visible: boolean) => {
   }
 }
 
-// 组件挂载时获取剩余下载次数
+// SSE 消息处理器取消注册函数
+let unregisterSseHandler: (() => void) | null = null
+
+// 处理 SSE 消息
+const handleSseMessage = (data: any) => {
+  // 收到新消息时，刷新未读数
+  fetchUnreadCount()
+  // 可以选择显示一个通知提示
+  if (data.content) {
+    message.info(`收到新评论通知：${data.content}`)
+  }
+}
+
+// 注册 SSE 消息处理器
+const registerSseHandler = () => {
+  // 如果已经注册过，先取消之前的注册
+  if (unregisterSseHandler) {
+    console.log('[GlobalHeader] 取消之前的 SSE 处理器注册')
+    unregisterSseHandler()
+  }
+
+  console.log('[GlobalHeader] 注册 SSE 消息处理器')
+  console.log('[GlobalHeader] SSE 连接状态:', commentSseService.isConnected())
+  unregisterSseHandler = commentSseService.onMessage(handleSseMessage)
+  console.log('[GlobalHeader] SSE 消息处理器注册完成')
+}
+
+// 组件挂载时
 onMounted(() => {
   if (loginUserStore.loginUser.id) {
     fetchRemainingDownloads()
+    fetchUnreadCount()
+    // 延迟注册，确保 SSE 连接已建立
+    setTimeout(() => {
+      registerSseHandler()
+    }, 1000)
+  }
+})
+
+// 监听登录状态变化
+watch(() => loginUserStore.loginUser.id, (newId, oldId) => {
+  console.log('[GlobalHeader] 登录状态变化:', { oldId, newId })
+  if (newId && !oldId) {
+    // 用户刚登录，初始化数据
+    fetchRemainingDownloads()
+    fetchUnreadCount()
+    // 监听 SSE 消息
+    registerSseHandler()
+  } else if (!newId && oldId) {
+    // 用户登出，取消注册
+    if (unregisterSseHandler) {
+      console.log('[GlobalHeader] 用户登出，取消 SSE 处理器注册')
+      unregisterSseHandler()
+      unregisterSseHandler = null
+    }
+  }
+})
+
+// 组件卸载时
+onBeforeUnmount(() => {
+  // 取消注册 SSE 处理器
+  if (unregisterSseHandler) {
+    console.log('[GlobalHeader] 组件卸载，取消 SSE 处理器注册')
+    unregisterSseHandler()
+    unregisterSseHandler = null
   }
 })
 // 未经过滤的菜单项
@@ -257,6 +354,16 @@ const doLogout = async ()=>{
   justify-content: flex-end;
   align-items: center;
   padding-right: 24px;
+  gap: 8px;
+}
+
+/* 消息通知图标样式 */
+.notification-badge {
+  margin-right: 8px;
+}
+
+.notification-badge :deep(.ant-badge-count) {
+  box-shadow: 0 0 0 1px #fff;
 }
 
 /* 下拉菜单整体样式 */

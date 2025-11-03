@@ -5,6 +5,12 @@ declare namespace API {
     message?: string
   }
 
+  type BaseResponseCommentVO_ = {
+    code?: number
+    data?: CommentVO
+    message?: string
+  }
+
   type BaseResponseCreateOutPaintingTaskResponse_ = {
     code?: number
     data?: CreateOutPaintingTaskResponse
@@ -26,6 +32,12 @@ declare namespace API {
   type BaseResponseListCategoryVO_ = {
     code?: number
     data?: CategoryVO[]
+    message?: string
+  }
+
+  type BaseResponseListCommentVO_ = {
+    code?: number
+    data?: CommentVO[]
     message?: string
   }
 
@@ -104,6 +116,18 @@ declare namespace API {
   type BaseResponsePageCategoryVO_ = {
     code?: number
     data?: PageCategoryVO_
+    message?: string
+  }
+
+  type BaseResponsePageCommentNotificationVO_ = {
+    code?: number
+    data?: PageCommentNotificationVO_
+    message?: string
+  }
+
+  type BaseResponsePageCommentVO_ = {
+    code?: number
+    data?: PageCommentVO_
     message?: string
   }
 
@@ -262,6 +286,76 @@ declare namespace API {
     userId: number
   }
 
+  type CommentAddRequest = {
+    content?: string
+    parentId?: number
+    pictureId?: number
+    spaceId?: number
+  }
+
+  type CommentEditRequest = {
+    content?: string
+    id?: number
+  }
+
+  type CommentNotificationVO = {
+    commentId?: number
+    content?: string
+    createTime?: string
+    id?: number
+    isRead?: number
+    notificationType?: number
+    notificationTypeDesc?: string
+    pictureId?: number
+    title?: string
+    triggerUser?: UserVO
+    triggerUserId?: number
+    updateTime?: string
+    userId?: number
+  }
+
+  type CommentQueryRequest = {
+    current?: number
+    id?: number
+    maxCreateTime?: string
+    minCreateTime?: string
+    pageSize?: number
+    parentId?: number
+    pictureId?: number
+    rootId?: number
+    sortField?: string
+    sortOrder?: string
+    spaceId?: number
+    status?: number
+    userId?: number
+  }
+
+  type CommentReviewRequest = {
+    id?: number
+    reviewMessage?: string
+    reviewStatus?: number
+  }
+
+  type CommentVO = {
+    children?: CommentVO[]
+    content?: string
+    createTime?: string
+    editTime?: string
+    id?: number
+    level?: number
+    likeCount?: number
+    parentId?: number
+    pictureId?: number
+    replyCount?: number
+    rootId?: number
+    spaceId?: number
+    status?: number
+    statusDesc?: string
+    updateTime?: string
+    user?: UserVO
+    userId?: number
+  }
+
   type CreateOutPaintingTaskResponse = {
     code?: string
     message?: string
@@ -325,6 +419,29 @@ declare namespace API {
     id: number
   }
 
+  type getCommentByIdUsingGETParams = {
+    /** id */
+    id: number
+  }
+
+  type getCommentsByPictureIdUsingGETParams = {
+    /** current */
+    current?: number
+    /** pageSize */
+    pageSize?: number
+    /** pictureId */
+    pictureId: number
+    /** spaceId */
+    spaceId?: number
+  }
+
+  type getCommentTreeUsingGETParams = {
+    /** pictureId */
+    pictureId: number
+    /** spaceId */
+    spaceId?: number
+  }
+
   type GetOutPaintingTaskResponse = {
     output?: Output1
     requestId?: string
@@ -360,6 +477,15 @@ declare namespace API {
     id?: number
   }
 
+  type getUserNotificationsUsingGETParams = {
+    /** current */
+    current?: number
+    /** isRead */
+    isRead?: number
+    /** pageSize */
+    pageSize?: number
+  }
+
   type getUserVOByIdUsingGETParams = {
     /** id */
     id?: number
@@ -368,6 +494,18 @@ declare namespace API {
   type ImageSearchResult = {
     fromUrl?: string
     thumbUrl?: string
+  }
+
+  type listMyCommentsUsingGETParams = {
+    /** current */
+    current?: number
+    /** pageSize */
+    pageSize?: number
+  }
+
+  type markAsReadUsingPOSTParams = {
+    /** id */
+    id: number
   }
 
   type Output = {
@@ -391,6 +529,22 @@ declare namespace API {
     current?: number
     pages?: number
     records?: CategoryVO[]
+    size?: number
+    total?: number
+  }
+
+  type PageCommentNotificationVO_ = {
+    current?: number
+    pages?: number
+    records?: CommentNotificationVO[]
+    size?: number
+    total?: number
+  }
+
+  type PageCommentVO_ = {
+    current?: number
+    pages?: number
+    records?: CommentVO[]
     size?: number
     total?: number
   }
@@ -872,6 +1026,10 @@ declare namespace API {
     updateTime?: string
     user?: UserVO
     userId?: number
+  }
+
+  type SseEmitter = {
+    timeout?: number
   }
 
   type TaskMetrics = {

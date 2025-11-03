@@ -22,6 +22,7 @@ import VIPCodeManagePage from '@/pages/admin/VIPCodeManagePage.vue'
 import MyDownloadsPage from '@/pages/MyDownloadsPage.vue'
 import MyCollectionsPage from '@/pages/MyCollectionsPage.vue'
 import SpaceListPage from '@/pages/SpaceListPage.vue'
+import NotificationCenterPage from '@/pages/NotificationCenterPage.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -120,6 +121,11 @@ const router = createRouter({
       path: '/user/profile',
       name: '用户信息',
       component: UserProfilePage,
+    },
+    {
+      path: '/notification/center',
+      name: '通知中心',
+      component: NotificationCenterPage,
     },
     {
       path:'/space/:id',
