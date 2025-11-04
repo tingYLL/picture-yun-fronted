@@ -17,12 +17,19 @@
 <!--        <a href="#" target="_blank">哔哔哩哩 by 蒙古上单</a>-->
 <!--      </a-layout-footer>-->
     </a-layout>
+    <!-- 回到顶部按钮 -->
+    <a-back-top :visibility-height="300">
+      <div class="back-top-btn">
+        <UpOutlined />
+      </div>
+    </a-back-top>
   </div>
 </template>
 <script setup lang="ts">
 
 import GlobalHeader from "@/components/GlobalHeader.vue";
 import GlobalSider from "@/components/GlobalSider.vue";
+import { UpOutlined } from '@ant-design/icons-vue';
 import { ref } from 'vue';
 
 // 侧边栏收缩状态
@@ -37,10 +44,16 @@ const toggleSider = () => {
 <style scoped>
 
 #basicLayout .header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   padding-inline: 20px;
   background: white;
   color: unset;
   margin-bottom: 1px;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 #basicLayout .sider-container {
@@ -68,6 +81,7 @@ const toggleSider = () => {
 
 #basicLayout .content {
   padding: 28px;
+  padding-top: 92px; /* header高度64px + 额外间距28px */
   padding-left: 228px; /* 侧边栏宽度 + 额外间距 */
   background: linear-gradient(to right, #fefefe, #fff);
   min-height: calc(100vh - 64px);
@@ -91,5 +105,27 @@ const toggleSider = () => {
   left: 0;
   right: 0;
   text-align: center;
+}
+
+/* 回到顶部按钮样式 */
+.back-top-btn {
+  width: 48px;
+  height: 48px;
+  background-color: #1890ff;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  box-shadow: 0 2px 12px rgba(24, 144, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.back-top-btn:hover {
+  background-color: #40a9ff;
+  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.6);
+  transform: translateY(-2px);
 }
 </style>

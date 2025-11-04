@@ -32,7 +32,7 @@
 
             <a-dropdown @visibleChange="handleDropdownVisibleChange">
               <a-space :size="8">
-                <a-badge :dot="loginUserStore.loginUser.isVip" :offset="[-8, 32]">
+                <a-badge :dot="loginUserStore.loginUser.isVip" :offset="[-8, 32]" @click="goToProfile">
                   <template #count>
                     <div
                       class="vip-badge-icon"
@@ -41,7 +41,7 @@
                       <SketchOutlined />
                     </div>
                   </template>
-                  <a-avatar :src="loginUserStore.loginUser.userAvatar" :size="40" />
+                  <a-avatar :src="loginUserStore.loginUser.userAvatar" :size="40" style="cursor: pointer" />
                 </a-badge>
                 <div class="user-info">
                   <span class="user-name-text">{{
@@ -67,18 +67,10 @@
                   <a-divider class="menu-divider" />
 
                   <div class="menu-item vip-item" @click="openPaymentModal">
-                    <CrownOutlined class="vip-crown" />
+<!--                    <CrownOutlined class="vip-crown" />-->
                     <StarOutlined class="vip-star" />
                     <span class="vip-text">VIP充值</span>
                     <RightOutlined class="menu-arrow" />
-                  </div>
-
-                  <div class="menu-item">
-                    <router-link to="/user/profile" class="menu-link">
-                      <UserOutlined />
-                      <span>个人信息</span>
-                      <RightOutlined class="menu-arrow" />
-                    </router-link>
                   </div>
 
                   <a-divider class="menu-divider" />
@@ -135,6 +127,8 @@ import PaymentModal from './PaymentModal.vue'
 
 const loginUserStore = useLoginUserStore()
 
+const router = useRouter()
+
 // 剩余下载次数
 const remainingDownloads = ref<number>(0)
 
@@ -168,6 +162,12 @@ const fetchUnreadCount = async () => {
 // 跳转到通知中心
 const goToNotificationCenter = () => {
   router.push('/notification/center')
+}
+
+// 跳转到个人信息页
+const goToProfile = (e: Event) => {
+  e.stopPropagation() // 阻止事件冒泡，防止触发下拉菜单
+  router.push('/user/profile')
 }
 
 // PaymentModal ref
@@ -330,7 +330,6 @@ const filterMenus = (menus = [] as MenuProps['items']) => {
 // 展示在菜单的路由数组
 const items = computed(() => filterMenus(originItems))
 
-const router = useRouter()
 // 路由跳转事件
 const doMenuClick = ({ key }) => {
   router.push({
