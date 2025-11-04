@@ -235,13 +235,13 @@ const doShare = (picture, e) => {
 const breakpoints = ref({
   3000: {
     //当屏幕宽度小于等于3000
-    rowPerView: 7, // 一行8图
+    rowPerView: 8, // 一行8图
   },
   1800: {
-    rowPerView: 6,
+    rowPerView: 7,
   },
   1500: {
-    rowPerView: 5,
+    rowPerView: 6,
   },
   1200: {
     rowPerView: 4,

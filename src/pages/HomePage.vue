@@ -16,10 +16,16 @@
     </div>
 
     <!--    分类和标签筛选-->
-    <a-tabs v-model:active-key="selectedCategory" @change="doSearch">
-      <a-tab-pane tab="全部" key="all"></a-tab-pane>
-      <a-tab-pane :tab="category.name" :key="category.id" v-for="category in categoryList"></a-tab-pane>
-    </a-tabs>
+    <div class="category-tabs-wrapper">
+      <a-tabs
+        v-model:active-key="selectedCategory"
+        @change="doSearch"
+        :tabBarStyle="{ marginBottom: 0 }"
+      >
+        <a-tab-pane tab="全部" key="all"></a-tab-pane>
+        <a-tab-pane :tab="category.name" :key="category.id" v-for="category in categoryList"></a-tab-pane>
+      </a-tabs>
+    </div>
 
     <div v-if="homeLoading" class="loading-spinner">
       <a-spin size="large" tip="加载中..." />
@@ -240,7 +246,7 @@ const handleScrollDebounced = debounce(handleScroll, 200)
 }
 
 #homePage .search-bar{
-  max-width: 480px;
+  max-width: 640px;
   margin: 0 auto 16px;
 }
 
@@ -259,5 +265,124 @@ const handleScrollDebounced = debounce(handleScroll, 200)
   flex: 1;
   max-width: 700px;
 }
+
+/* 分类标签容器 */
+.category-tabs-wrapper {
+  position: relative;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 12px 20px;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* 标签栏横向滚动 */
+.category-tabs-wrapper :deep(.ant-tabs-nav) {
+  margin-bottom: 0 !important;
+  max-width: 600px; /* 限制宽度，大约能显示5个标签 */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.category-tabs-wrapper :deep(.ant-tabs-nav-wrap) {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 0;
+  /* 隐藏滚动条，但保留滚动功能 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 和 Edge */
+}
+
+/* Webkit浏览器隐藏滚动条 */
+.category-tabs-wrapper :deep(.ant-tabs-nav-wrap::-webkit-scrollbar) {
+  display: none;
+}
+
+/* 隐藏默认的下划线 */
+.category-tabs-wrapper :deep(.ant-tabs-ink-bar) {
+  display: none;
+}
+
+/* 标签项样式 - 胶囊形状，更小更紧凑 */
+.category-tabs-wrapper :deep(.ant-tabs-tab) {
+  padding: 6px 16px;
+  margin: 0 4px;
+  white-space: nowrap;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  border: 1.5px solid transparent;
+  font-weight: 400;
+  font-size: 14px;
+  color: #5a6c7d;
+  backdrop-filter: blur(10px);
+}
+
+.category-tabs-wrapper :deep(.ant-tabs-tab:hover) {
+  background: rgba(255, 255, 255, 0.85);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  color: #1890ff;
+}
+
+/* 选中的标签 - 简洁白色背景 */
+.category-tabs-wrapper :deep(.ant-tabs-tab-active) {
+  background: white;
+  color: #1890ff !important;
+  border-color: #1890ff;
+  font-weight: 600;
+  box-shadow: 0 2px 10px rgba(24, 144, 255, 0.2);
+}
+
+.category-tabs-wrapper :deep(.ant-tabs-tab-active .ant-tabs-tab-btn) {
+  color: #1890ff !important;
+}
+
+/* 边缘渐变遮罩效果 - 更柔和 */
+.category-tabs-wrapper::before,
+.category-tabs-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  width: 50px;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.3s;
+}
+
+.category-tabs-wrapper::before {
+  left: 0;
+  background: linear-gradient(to right, #f5f7fa, transparent);
+}
+
+.category-tabs-wrapper::after {
+  right: 0;
+  background: linear-gradient(to left, #c3cfe2, transparent);
+}
+
+/* 平滑滚动 */
+.category-tabs-wrapper :deep(.ant-tabs-nav-wrap) {
+  scroll-behavior: smooth;
+}
+
+/* 添加微妙的动画 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.category-tabs-wrapper {
+  animation: fadeInUp 0.5s ease-out;
+}
+
 </style>
 
