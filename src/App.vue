@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <a-config-provider
+      :locale="zhCN"
       :theme="{
         token: {
           colorPrimary: '#f97198', // 主题色
@@ -8,8 +9,8 @@
         },
       }"
     >
+      <BasicLayout />
     </a-config-provider>
-    <BasicLayout />
   </div>
 </template>
 
@@ -20,6 +21,7 @@ import HelloWorld from './components/HelloWorld.vue'
 import BasicLayout from '@/layouts/BasicLayout.vue'
 import { useLoginUserStore } from '@/stores/useLoginUserStore'
 import { commentSseService } from '@/utils/commentSse'
+import zhCN from 'ant-design-vue/es/locale/zh_CN'
 
 const loginUserStore = useLoginUserStore()
 
