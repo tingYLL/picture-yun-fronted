@@ -2,10 +2,11 @@
   <div id="globalHeader">
     <a-row :wrap="false" align="middle">
       <a-col flex="auto">
-        <div style="display: flex; align-items: center;">
+        <div style="display: flex; align-items: center">
           <router-link to="/">
             <div class="title-bar">
-              <div class="title">哔哔哩哩</div>
+              <img src="/logo.png" alt="logo" class="logo" />
+<!--              <div class="title">哔哔哩哩</div>-->
             </div>
           </router-link>
           <a-menu
@@ -13,7 +14,7 @@
             mode="horizontal"
             :items="items"
             @click="doMenuClick"
-            style="flex: 1; border: none;"
+            style="flex: 1; border: none; margin-left: 40px"
           />
         </div>
       </a-col>
@@ -22,12 +23,7 @@
           <div v-if="loginUserStore.loginUser.id">
             <!-- 消息通知图标 -->
             <a-badge :count="unreadCount" :overflow-count="99" class="notification-badge">
-              <a-button
-                type="text"
-                shape="circle"
-                size="large"
-                @click="goToNotificationCenter"
-              >
+              <a-button type="text" shape="circle" size="large" @click="goToNotificationCenter">
                 <template #icon>
                   <BellOutlined :style="{ fontSize: '20px' }" />
                 </template>
@@ -38,14 +34,19 @@
               <a-space :size="8">
                 <a-badge :dot="loginUserStore.loginUser.isVip" :offset="[-8, 32]">
                   <template #count>
-                    <div class="vip-badge-icon" :class="{ 'non-vip': !loginUserStore.loginUser.isVip }">
+                    <div
+                      class="vip-badge-icon"
+                      :class="{ 'non-vip': !loginUserStore.loginUser.isVip }"
+                    >
                       <SketchOutlined />
                     </div>
                   </template>
                   <a-avatar :src="loginUserStore.loginUser.userAvatar" :size="40" />
                 </a-badge>
                 <div class="user-info">
-                  <span class="user-name-text">{{loginUserStore.loginUser.userName??'无名'}}</span>
+                  <span class="user-name-text">{{
+                    loginUserStore.loginUser.userName ?? '无名'
+                  }}</span>
                 </div>
               </a-space>
               <template #overlay>
@@ -89,7 +90,7 @@
                   </div>
                 </div>
               </template>
-          </a-dropdown>
+            </a-dropdown>
           </div>
           <div v-else>
             <a-button type="primary" href="/user/login">登录</a-button>
@@ -103,16 +104,32 @@
   </div>
 </template>
 <script lang="ts" setup>
-import {computed, h, ref, onMounted, onBeforeUnmount, watch} from 'vue';
-import {HomeOutlined,LogoutOutlined,UserOutlined,CrownOutlined,StarOutlined,
-  CloudDownloadOutlined,RightOutlined,SketchOutlined,BellOutlined} from '@ant-design/icons-vue';
-import {MenuProps, message} from 'ant-design-vue';
-import {useRouter} from "vue-router";
-import {useLoginUserStore} from "@/stores/useLoginUserStore";
-import {userLogoutUsingPost} from "@/api/userController";
-import {getRemainingDownloadsUsingGet} from "@/api/downloadController";
-import {getUnreadCountUsingGet} from "@/api/commentNotificationController";
-import {commentSseService} from "@/utils/commentSse";
+import { computed, h, ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import {
+  HomeOutlined,
+  LogoutOutlined,
+  UserOutlined,
+  CrownOutlined,
+  StarOutlined,
+  CloudDownloadOutlined,
+  RightOutlined,
+  SketchOutlined,
+  BellOutlined,
+  UnorderedListOutlined,
+  TeamOutlined,
+  PictureOutlined,
+  AppstoreOutlined,
+  FolderOutlined,
+  ClockCircleOutlined,
+  GiftOutlined,
+} from '@ant-design/icons-vue'
+import { MenuProps, message } from 'ant-design-vue'
+import { useRouter } from 'vue-router'
+import { useLoginUserStore } from '@/stores/useLoginUserStore'
+import { userLogoutUsingPost } from '@/api/userController'
+import { getRemainingDownloadsUsingGet } from '@/api/downloadController'
+import { getUnreadCountUsingGet } from '@/api/commentNotificationController'
+import { commentSseService } from '@/utils/commentSse'
 import PictureReleaseListPage from '@/pages/PictureReleaseListPage.vue'
 import PaymentModal from './PaymentModal.vue'
 
@@ -209,23 +226,26 @@ onMounted(() => {
 })
 
 // 监听登录状态变化
-watch(() => loginUserStore.loginUser.id, (newId, oldId) => {
-  console.log('[GlobalHeader] 登录状态变化:', { oldId, newId })
-  if (newId && !oldId) {
-    // 用户刚登录，初始化数据
-    fetchRemainingDownloads()
-    fetchUnreadCount()
-    // 监听 SSE 消息
-    registerSseHandler()
-  } else if (!newId && oldId) {
-    // 用户登出，取消注册
-    if (unregisterSseHandler) {
-      console.log('[GlobalHeader] 用户登出，取消 SSE 处理器注册')
-      unregisterSseHandler()
-      unregisterSseHandler = null
+watch(
+  () => loginUserStore.loginUser.id,
+  (newId, oldId) => {
+    console.log('[GlobalHeader] 登录状态变化:', { oldId, newId })
+    if (newId && !oldId) {
+      // 用户刚登录，初始化数据
+      fetchRemainingDownloads()
+      fetchUnreadCount()
+      // 监听 SSE 消息
+      registerSseHandler()
+    } else if (!newId && oldId) {
+      // 用户登出，取消注册
+      if (unregisterSseHandler) {
+        console.log('[GlobalHeader] 用户登出，取消 SSE 处理器注册')
+        unregisterSseHandler()
+        unregisterSseHandler = null
+      }
     }
-  }
-})
+  },
+)
 
 // 组件卸载时
 onBeforeUnmount(() => {
@@ -251,38 +271,45 @@ const originItems = [
   // },
   {
     key: '/picture/list',
+    icon: () => h(UnorderedListOutlined),
     label: '发布列表',
-    title: '发布列表'
+    title: '发布列表',
   },
   {
     key: '/admin/userManage',
+    icon: () => h(TeamOutlined),
     label: '用户管理',
     title: '用户管理',
   },
   {
     key: '/admin/pictureManage',
+    icon: () => h(PictureOutlined),
     label: '图片管理',
     title: '图片管理',
   },
   {
     key: '/admin/categoryManage',
+    icon: () => h(AppstoreOutlined),
     label: '分类管理',
     title: '分类管理',
   },
   {
     key: '/admin/spaceManage',
+    icon: () => h(FolderOutlined),
     label: '空间管理',
     title: '空间管理',
   },
   {
-    key:'/admin/scheduledTask',
-    label:'定时任务',
-    title: '定时任务'
+    key: '/admin/scheduledTask',
+    icon: () => h(ClockCircleOutlined),
+    label: '定时任务',
+    title: '定时任务',
   },
   {
-    key:'/admin/vipCodeManage',
-    label:'兑换码管理',
-    title: '兑换码管理'
+    key: '/admin/vipCodeManage',
+    icon: () => h(GiftOutlined),
+    label: '兑换码管理',
+    title: '兑换码管理',
   },
 ]
 
@@ -311,24 +338,23 @@ const doMenuClick = ({ key }) => {
   })
 }
 //监听路由变化，更新菜单高亮项
-const current = ref<string[]>([]);
-router.afterEach((to,from,next)=>{
+const current = ref<string[]>([])
+router.afterEach((to, from, next) => {
   current.value = [to.path]
 })
 
-const doLogout = async ()=>{
+const doLogout = async () => {
   const res = await userLogoutUsingPost()
-  if(res.data.code === 0){
-    loginUserStore.setLoginUser({username:'未登录'})
+  if (res.data.code === 0) {
+    loginUserStore.setLoginUser({ username: '未登录' })
     message.success('已退出登录')
     await router.push({
-      path:'/user/login'
+      path: '/user/login',
     })
-  }else{
-    message.error('退出登录失败'+res.data.message)
+  } else {
+    message.error('退出登录失败' + res.data.message)
   }
 }
-
 </script>
 
 <style scoped>
@@ -345,7 +371,8 @@ const doLogout = async ()=>{
 }
 
 .logo {
-  height: 48px;
+  height: 60px;
+  margin: 0 4px;
 }
 
 /* 用户登录状态容器样式 */
@@ -492,8 +519,13 @@ const doLogout = async ()=>{
 }
 
 @keyframes sparkle {
-  0%, 100% { transform: scale(1) rotate(0deg); }
-  50% { transform: scale(1.1) rotate(180deg); }
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.1) rotate(180deg);
+  }
 }
 
 /* 退出登录样式 */
@@ -564,6 +596,4 @@ const doLogout = async ()=>{
   text-overflow: ellipsis;
   max-width: 120px;
 }
-
 </style>
-
