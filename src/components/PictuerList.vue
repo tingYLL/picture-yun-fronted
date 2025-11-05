@@ -343,9 +343,9 @@ const handlePictureClick = (picture: API.PictureVO, event: MouseEvent) => {
   left: 0;
   right: 0;
   width: 100%;
-  height: 35px;
+  height: 25px;
   z-index: 10;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.6) 30%, rgba(0, 0, 0, 0.3) 70%, rgba(0, 0, 0, 0) 100%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.4) 30%, rgba(0, 0, 0, 0.1) 70%, rgba(0, 0, 0, 0) 100%);
   color: #fff;
   padding: 12px 12px 8px 12px;
   font-size: 12px;
