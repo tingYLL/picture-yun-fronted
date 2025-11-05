@@ -270,7 +270,7 @@ const handleScrollDebounced = debounce(handleScroll, 200)
 .category-tabs-wrapper {
   position: relative;
   margin-bottom: 24px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: transparent;
   padding: 12px 20px;
   max-width: 100%;
   overflow: hidden;
@@ -338,29 +338,6 @@ const handleScrollDebounced = debounce(handleScroll, 200)
 
 .category-tabs-wrapper :deep(.ant-tabs-tab-active .ant-tabs-tab-btn) {
   color: #1890ff !important;
-}
-
-/* 边缘渐变遮罩效果 - 更柔和 */
-.category-tabs-wrapper::before,
-.category-tabs-wrapper::after {
-  content: '';
-  position: absolute;
-  top: 12px;
-  bottom: 12px;
-  width: 50px;
-  pointer-events: none;
-  z-index: 2;
-  transition: opacity 0.3s;
-}
-
-.category-tabs-wrapper::before {
-  left: 0;
-  background: linear-gradient(to right, #f5f7fa, transparent);
-}
-
-.category-tabs-wrapper::after {
-  right: 0;
-  background: linear-gradient(to left, #c3cfe2, transparent);
 }
 
 /* 平滑滚动 */
