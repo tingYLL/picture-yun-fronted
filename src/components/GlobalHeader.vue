@@ -93,6 +93,20 @@
 
     <!-- PaymentModal组件 -->
     <PaymentModal ref="paymentModalRef" />
+
+    <!-- 消息通知卡片 -->
+    <transition name="slide-fade">
+      <div v-if="showNotificationCard" class="notification-card" @click="handleCardClick">
+        <div class="notification-card-content">
+          <BellOutlined class="notification-card-icon" />
+          <span class="notification-card-text">收到新消息</span>
+          <CloseOutlined class="notification-card-close" @click.stop="closeNotificationCard" />
+        </div>
+        <div class="notification-card-progress">
+          <div class="progress-bar" :style="{ width: progressWidth + '%' }"></div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 <script lang="ts" setup>
@@ -114,6 +128,7 @@ import {
   FolderOutlined,
   ClockCircleOutlined,
   GiftOutlined,
+  CloseOutlined,
 } from '@ant-design/icons-vue'
 import { MenuProps, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
@@ -134,6 +149,13 @@ const remainingDownloads = ref<number>(0)
 
 // 未读消息数
 const unreadCount = ref<number>(0)
+
+// 消息通知卡片状态
+const showNotificationCard = ref<boolean>(false)
+const currentNotification = ref<string>('')
+const progressWidth = ref<number>(100)
+let notificationTimer: number | null = null
+let progressTimer: number | null = null
 
 // 获取剩余下载次数
 const fetchRemainingDownloads = async () => {
@@ -193,10 +215,68 @@ let unregisterSseHandler: (() => void) | null = null
 const handleSseMessage = (data: any) => {
   // 收到新消息时，刷新未读数
   fetchUnreadCount()
-  // 可以选择显示一个通知提示
+  // 显示通知卡片
   if (data.content) {
-    message.info(`收到新评论通知：${data.content}`)
+    showNotification(data.content)
   }
+}
+
+// 显示通知卡片
+const showNotification = (content: string) => {
+  // 清除之前的定时器
+  if (notificationTimer) {
+    clearTimeout(notificationTimer)
+  }
+  if (progressTimer) {
+    clearInterval(progressTimer)
+  }
+
+  // 设置通知内容并显示
+  currentNotification.value = content
+  showNotificationCard.value = true
+  progressWidth.value = 100
+
+  // 进度条动画 (5秒)
+  const duration = 5000
+  const interval = 50
+  const step = (interval / duration) * 100
+
+  progressTimer = window.setInterval(() => {
+    progressWidth.value -= step
+    if (progressWidth.value <= 0) {
+      progressWidth.value = 0
+      if (progressTimer) {
+        clearInterval(progressTimer)
+      }
+    }
+  }, interval)
+
+  // 5秒后自动关闭
+  notificationTimer = window.setTimeout(() => {
+    closeNotificationCard()
+  }, duration)
+}
+
+// 关闭通知卡片
+const closeNotificationCard = () => {
+  showNotificationCard.value = false
+  if (notificationTimer) {
+    clearTimeout(notificationTimer)
+    notificationTimer = null
+  }
+  if (progressTimer) {
+    clearInterval(progressTimer)
+    progressTimer = null
+  }
+}
+
+// 点击卡片跳转到通知中心
+const handleCardClick = () => {
+  // 在新标签页打开通知中心
+  const route = router.resolve('/notification/center')
+  window.open(route.href, '_blank')
+  // 关闭卡片
+  closeNotificationCard()
 }
 
 // 注册 SSE 消息处理器
@@ -255,7 +335,15 @@ onBeforeUnmount(() => {
     unregisterSseHandler()
     unregisterSseHandler = null
   }
+  // 清除定时器
+  if (notificationTimer) {
+    clearTimeout(notificationTimer)
+  }
+  if (progressTimer) {
+    clearInterval(progressTimer)
+  }
 })
+
 // 未经过滤的菜单项
 const originItems = [
   {
@@ -594,5 +682,102 @@ const doLogout = async () => {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 120px;
+}
+
+/* 消息通知卡片样式 */
+.notification-card {
+  position: fixed;
+  top: 80px;
+  right: 24px;
+  width: 280px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  z-index: 2000;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.notification-card:hover {
+  background: #ebebeb;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.notification-card-content {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  gap: 10px;
+}
+
+.notification-card-icon {
+  font-size: 16px;
+  color: #8c8c8c;
+  flex-shrink: 0;
+}
+
+.notification-card-text {
+  flex: 1;
+  font-size: 14px;
+  color: #595959;
+  font-weight: 500;
+}
+
+.notification-card-close {
+  cursor: pointer;
+  font-size: 12px;
+  color: #8c8c8c;
+  opacity: 0.6;
+  transition: opacity 0.3s;
+  flex-shrink: 0;
+}
+
+.notification-card-close:hover {
+  opacity: 1;
+}
+
+.notification-card-progress {
+  height: 2px;
+  background: #e0e0e0;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: #8c8c8c;
+  transition: width 0.05s linear;
+}
+
+/* 滑入滑出动画 */
+.slide-fade-enter-active {
+  animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-fade-leave-active {
+  animation: slideOut 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
 }
 </style>

@@ -1,21 +1,15 @@
 <template>
-  <div id="basicLayout" :class="{ collapsed: collapsed }">
+  <div id="basicLayout">
     <a-layout style="min-height: 100vh">
       <a-layout-header class="header">
         <GlobalHeader />
       </a-layout-header>
       <a-layout>
-        <!-- 侧边栏容器 -->
-        <div class="sider-container" :class="{ collapsed: collapsed }">
-          <GlobalSider class="sider" :collapsed="collapsed" @toggle-sider="toggleSider" />
-        </div>
-        <a-layout-content class="content">
+        <GlobalSider v-model:collapsed="collapsed" />
+        <a-layout-content class="content" :style="{ marginLeft: collapsed ? '80px' : '200px' }">
           <router-view />
         </a-layout-content>
       </a-layout>
-<!--      <a-layout-footer class="footer">-->
-<!--        <a href="#" target="_blank">哔哔哩哩 by 蒙古上单</a>-->
-<!--      </a-layout-footer>-->
     </a-layout>
     <!-- 回到顶部按钮 -->
     <a-back-top :visibility-height="300">
@@ -34,11 +28,6 @@ import { ref } from 'vue';
 
 // 侧边栏收缩状态
 const collapsed = ref(false);
-
-// 切换侧边栏
-const toggleSider = () => {
-  collapsed.value = !collapsed.value;
-};
 </script>
 
 <style scoped>
@@ -51,60 +40,21 @@ const toggleSider = () => {
   padding-inline: 20px;
   background: white;
   color: unset;
-  margin-bottom: 1px;
   z-index: 1000;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-#basicLayout .sider-container {
-  position: fixed;
-  left: 0;
-  top: 64px; /* header高度 */
-  height: calc(100vh - 64px);
-  z-index: 999;
-  background: #fff;
-  border-right: 0.5px solid #eee;
-  transition: all 0.3s ease;
-}
-
-#basicLayout .sider{
-  background-color: #fff;
-  padding-top: 20px;
-  height: 100%;
-  overflow-y: auto;
-}
-
-#basicLayout :deep(.ant-menu-root) {
-  border-bottom: none !important;
-  border-inline-end: none !important;
 }
 
 #basicLayout .content {
   padding: 28px;
   padding-top: 92px; /* header高度64px + 额外间距28px */
-  padding-left: 228px; /* 侧边栏宽度 + 额外间距 */
   background: linear-gradient(to right, #fefefe, #fff);
-  min-height: calc(100vh - 64px);
-  transition: padding-left 0.3s ease;
+  min-height: 100vh;
+  transition: margin-left 0.3s;
 }
 
-/* 当侧边栏收缩时的样式 */
-#basicLayout .sider-container.collapsed {
-  left: -200px;
-}
-
-#basicLayout.collapsed .content {
-  padding-left: 28px;
-}
-
-#basicLayout .footer {
-  background: #efefef;
-  padding: 16px;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  text-align: center;
+#basicLayout :deep(.ant-menu-root) {
+  border-bottom: none !important;
+  border-inline-end: none !important;
 }
 
 /* 回到顶部按钮样式 */

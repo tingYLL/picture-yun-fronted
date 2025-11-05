@@ -154,12 +154,12 @@ const categoryColumns = [
     align: 'center',
     customCell: () => ({ style: { minWidth: '250px', maxWidth: '250px' } }),
   },
-  {
-    title: '使用数量',
-    dataIndex: 'useNum',
-    align: 'center',
-    customCell: () => ({ style: { minWidth: '100px', maxWidth: '100px' } }),
-  },
+  // {
+  //   title: '使用数量',
+  //   dataIndex: 'useNum',
+  //   align: 'center',
+  //   customCell: () => ({ style: { minWidth: '100px', maxWidth: '100px' } }),
+  // },
   {
     title: '用户 ID',
     dataIndex: 'userId',

@@ -1,48 +1,35 @@
 <template>
-  <div id="globalSider">
-    <a-layout-sider
-      width="200"
-      collapsed-width="0"
-      breakpoint="lg"
-      :collapsed="collapsed"
-      :trigger="null"
-      collapsible
+  <a-layout-sider
+    width="200"
+    v-model:collapsed="localCollapsed"
+    collapsible
+    theme="light"
+    :style="{
+      overflow: 'auto',
+      height: '100vh',
+      position: 'fixed',
+      left: 0,
+      top: 0,
+      paddingTop: '64px'
+    }"
+  >
+    <a-menu
+      v-model:selectedKeys="current"
+      mode="inline"
+      :items="menuItems"
+      @click="doMenuClick"
+      style="margin-top: 20px;"
     >
-      <a-menu
-        v-model:selectedKeys="current"
-        mode="inline"
-        :items="menuItems"
-        @click="doMenuClick"
-        :inline-collapsed="collapsed"
-      >
-      </a-menu>
-
-    </a-layout-sider>
-
-    <!-- 展开按钮（当侧边栏收缩时显示在外部） -->
-    <div v-if="collapsed" class="sider-toggle-btn sider-expand-btn" :style="{ left: siderWidth + 'px' }" @click="$emit('toggle-sider')">
-      <MenuUnfoldOutlined />
-    </div>
-
-    <!-- 收缩按钮（当侧边栏展开时显示在外部） -->
-    <div v-if="!collapsed" class="sider-toggle-btn sider-collapse-btn-external" :style="{ left: siderWidth + 'px' }" @click="$emit('toggle-sider')">
-      <MenuFoldOutlined />
-    </div>
-  </div>
+    </a-menu>
+  </a-layout-sider>
 </template>
 <script lang="ts" setup>
-import {h, ref, computed} from 'vue';
-import {CloudOutlined,DownloadOutlined,StarOutlined,MenuFoldOutlined,MenuUnfoldOutlined} from '@ant-design/icons-vue';
+import {h, ref} from 'vue';
+import {CloudOutlined,DownloadOutlined,StarOutlined} from '@ant-design/icons-vue';
 import {useRouter} from "vue-router";
 
-// 接收 props 和定义 emits
-const props = defineProps<{
-  collapsed: boolean;
-}>();
-
-defineEmits<{
-  (e: 'toggle-sider'): void;
-}>();
+// 使用 v-model 方式
+const localCollapsed = defineModel<boolean>('collapsed', { default: false });
 
 // 菜单项 - 简化为三个选项
 const menuItems = [
@@ -76,95 +63,57 @@ router.afterEach((to,from,next)=>{
   current.value = [to.path]
 })
 
-// 侧边栏宽度，用于按钮位置计算
-const siderWidth = computed(() => {
-  return props.collapsed ? 0 : 200;
-})
-
 </script>
 
 <style scoped>
-#globalSider .ant-layout-sider {
-  background: none;
-  display: flex;
-  flex-direction: column;
+/* 设置侧边栏背景为白色 */
+:deep(.ant-layout-sider) {
+  background: #fff;
+  border-right: 1px solid #f0f0f0;
 }
 
-#globalSider :deep(.ant-layout-sider-zero-width-trigger ){
-  background-color: #4590d7;
-}
-
-#globalSider :deep(.ant-menu) {
-  flex: 1;
-}
-
-.sider-collapse-btn {
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+/* 自定义官方触发器的样式 */
+:deep(.ant-layout-sider-trigger) {
+  background-color: #fff;
   color: #666;
-  font-size: 18px;
-  transition: all 0.3s;
   border-top: 1px solid #f0f0f0;
-  background: #fafafa;
+  transition: all 0.3s;
 }
 
-.sider-collapse-btn:hover {
-  background: #e6f7ff;
+:deep(.ant-layout-sider-trigger:hover) {
+  background-color: #e6f7ff;
   color: #1890ff;
 }
 
-.sider-expand-btn {
-  position: fixed;
+:deep(.ant-layout-sider-zero-width-trigger) {
+  background-color: #1890ff;
   top: 50%;
   transform: translateY(-50%);
-  width: 20px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #666;
-  font-size: 16px;
-  transition: all 0.3s, left 0.3s;
-  background: #fff;
-  border: 1px solid #d9d9d9;
-  border-left: none;
   border-radius: 0 6px 6px 0;
-  z-index: 1000;
 }
 
-.sider-expand-btn:hover {
-  color: #1890ff;
-  background: #e6f7ff;
-  border-color: #1890ff;
+:deep(.ant-layout-sider-zero-width-trigger:hover) {
+  background-color: #40a9ff;
 }
 
-.sider-collapse-btn-external {
-  position: fixed;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 20px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #666;
-  font-size: 16px;
-  transition: all 0.3s, left 0.3s;
+/* 菜单背景也设置为白色 */
+:deep(.ant-menu) {
   background: #fff;
-  border: 1px solid #d9d9d9;
-  border-radius: 0 6px 6px 0;
-  z-index: 1001; /* 比侧边栏容器更高的z-index */
 }
 
-.sider-collapse-btn-external:hover {
+/* 菜单项默认状态 */
+:deep(.ant-menu-item) {
+  color: #333;
+}
+
+:deep(.ant-menu-item:hover) {
   color: #1890ff;
-  background: #e6f7ff;
-  border-color: #1890ff;
+}
+
+/* 选中的菜单项 */
+:deep(.ant-menu-item-selected) {
+  background-color: #e6f7ff;
+  color: #1890ff;
 }
 </style>
 
