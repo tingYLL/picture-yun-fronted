@@ -14,16 +14,38 @@ class CommentSseService {
   private maxReconnectAttempts = 5
   private reconnectDelay = 3000
   private isManualClose = false
+  // 心跳检测相关
+  private lastHeartbeatTime = 0
+  private heartbeatCheckInterval: number | null = null
+  private readonly heartbeatTimeout = 60000 // 60秒没有收到心跳则认为连接断开
+  // 连接状态标志 - 防止并发连接
+  private isConnecting = false
 
   /**
    * 建立 SSE 连接
    */
   connect(): void {
-    if (this.eventSource) {
-      console.warn('[CommentSSE] 连接已存在')
+    // 如果正在连接中，避免重复调用
+    if (this.isConnecting) {
+      console.warn('[CommentSSE] 连接正在建立中，忽略重复调用')
       return
     }
 
+    // 如果已存在连接，先强制关闭旧连接
+    if (this.eventSource) {
+      console.warn('[CommentSSE] 检测到已存在的连接，先关闭旧连接再建立新连接')
+      try {
+        this.eventSource.close()
+      } catch (error) {
+        console.error('[CommentSSE] 关闭旧连接时出错:', error)
+      }
+      this.eventSource = null
+      // 停止旧的心跳检测
+      this.stopHeartbeatCheck()
+    }
+
+    // 设置连接中标志
+    this.isConnecting = true
     this.isManualClose = false
     const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8123'
     const sseUrl = `${baseURL}/api/comment/sse/connect`
@@ -39,8 +61,12 @@ class CommentSseService {
 
       // 监听连接打开事件
       this.eventSource.onopen = () => {
-        console.log('[CommentSSE] 连接已建立')
+        console.log('[CommentSSE] ✅ 连接已建立成功')
         this.reconnectAttempts = 0
+        this.lastHeartbeatTime = Date.now()
+        this.startHeartbeatCheck()
+        // 连接建立成功，重置标志
+        this.isConnecting = false
       }
 
       // 监听连接成功事件
@@ -48,13 +74,21 @@ class CommentSseService {
       //如果没有指定 name，事件类型默认是 message，会触发 onmessage
       //如果指定了 name（如 "newNotification"），必须用 addEventListener 监听，onmessage 不会触发
       this.eventSource.addEventListener('connected', (event) => {
-        console.log('[CommentSSE] 连接成功:', event.data)
+        console.log('[CommentSSE] ✅ 收到连接成功事件:', event.data)
+        this.lastHeartbeatTime = Date.now()
         // 连接成功消息不需要通知处理器，仅用于确认连接
+      })
+
+      // 监听心跳事件
+      this.eventSource.addEventListener('heartbeat', (event) => {
+        console.log('[CommentSSE] 收到心跳:', new Date().toLocaleTimeString())
+        this.lastHeartbeatTime = Date.now()
       })
 
       // 监听新通知事件
       this.eventSource.addEventListener('newNotification', (event) => {
         console.log('[CommentSSE] 收到新通知:', event.data)
+        this.lastHeartbeatTime = Date.now() // 收到消息也更新心跳时间
 
         try {
           const data = JSON.parse(event.data)
@@ -67,6 +101,7 @@ class CommentSseService {
       // 监听未读数量更新事件
       this.eventSource.addEventListener('unreadCount', (event) => {
         console.log('[CommentSSE] 未读数量更新:', event.data)
+        this.lastHeartbeatTime = Date.now() // 收到消息也更新心跳时间
 
         try {
           // unreadCount 是纯数字，不是 JSON
@@ -82,6 +117,12 @@ class CommentSseService {
         console.error('[CommentSSE] 连接错误:', error)
         this.notifyErrorHandlers(error)
 
+        // 重置连接中标志
+        this.isConnecting = false
+
+        // 停止心跳检测
+        this.stopHeartbeatCheck()
+
         // 关闭当前连接
         this.eventSource?.close()
         this.eventSource = null
@@ -93,6 +134,7 @@ class CommentSseService {
       }
     } catch (error) {
       console.error('[CommentSSE] 创建连接失败:', error)
+      this.isConnecting = false
       this.attemptReconnect()
     }
   }
@@ -121,11 +163,66 @@ class CommentSseService {
   }
 
   /**
+   * 启动心跳检测
+   */
+  private startHeartbeatCheck(): void {
+    // 清除之前的定时器
+    this.stopHeartbeatCheck()
+
+    console.log('[CommentSSE] 启动心跳检测')
+
+    // 每 20 秒检查一次心跳
+    this.heartbeatCheckInterval = window.setInterval(() => {
+      const now = Date.now()
+      const timeSinceLastHeartbeat = now - this.lastHeartbeatTime
+
+      console.log(
+        `[CommentSSE] 心跳检测: 距离上次心跳 ${Math.floor(timeSinceLastHeartbeat / 1000)} 秒`
+      )
+
+      // 如果超过心跳超时时间没有收到任何消息，则认为连接已断开
+      if (timeSinceLastHeartbeat > this.heartbeatTimeout) {
+        console.warn('[CommentSSE] 心跳超时，连接可能已断开，准备重连')
+
+        // 停止心跳检测
+        this.stopHeartbeatCheck()
+
+        // 关闭当前连接
+        if (this.eventSource) {
+          this.eventSource.close()
+          this.eventSource = null
+        }
+
+        // 尝试重连
+        if (!this.isManualClose) {
+          this.reconnectAttempts = 0 // 重置重连计数，因为这不是错误导致的重连
+          this.attemptReconnect()
+        }
+      }
+    }, 20000) // 每 20 秒检查一次
+  }
+
+  /**
+   * 停止心跳检测
+   */
+  private stopHeartbeatCheck(): void {
+    if (this.heartbeatCheckInterval) {
+      console.log('[CommentSSE] 停止心跳检测')
+      clearInterval(this.heartbeatCheckInterval)
+      this.heartbeatCheckInterval = null
+    }
+  }
+
+  /**
    * 断开 SSE 连接
    */
   disconnect(): void {
     console.log('[CommentSSE] 正在断开连接...')
     this.isManualClose = true
+    this.isConnecting = false
+
+    // 停止心跳检测
+    this.stopHeartbeatCheck()
 
     if (this.eventSource) {
       this.eventSource.close()
@@ -201,7 +298,27 @@ class CommentSseService {
    * 获取连接状态
    */
   isConnected(): boolean {
-    return this.eventSource !== null && this.eventSource.readyState === EventSource.OPEN
+    // 如果 eventSource 不存在，返回 false
+    if (!this.eventSource) {
+      return false
+    }
+
+    // EventSource.readyState 状态：
+    // 0 (CONNECTING) - 连接正在建立中，这是正常状态
+    // 1 (OPEN) - 连接已建立
+    // 2 (CLOSED) - 连接已关闭，需要清理
+
+    // 只清理已关闭的连接，不要清理正在建立中的连接
+    if (this.eventSource.readyState === EventSource.CLOSED) {
+      console.warn('[CommentSSE] 检测到已关闭的连接，进行清理')
+      this.eventSource = null
+      this.isConnecting = false
+      this.stopHeartbeatCheck()
+      return false
+    }
+
+    // 连接正在建立中 (CONNECTING) 或已建立 (OPEN) 都返回相应状态
+    return this.eventSource.readyState === EventSource.OPEN
   }
 }
 

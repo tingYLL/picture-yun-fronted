@@ -288,7 +288,8 @@ const registerSseHandler = () => {
   }
 
   console.log('[GlobalHeader] 注册 SSE 消息处理器')
-  console.log('[GlobalHeader] SSE 连接状态:', commentSseService.isConnected())
+  // 直接注册，不需要检查连接状态
+  // 即使连接还在建立中，处理器也可以注册
   unregisterSseHandler = commentSseService.onMessage(handleSseMessage)
   console.log('[GlobalHeader] SSE 消息处理器注册完成')
 }
